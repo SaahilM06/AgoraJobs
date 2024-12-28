@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react'
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import JobBoard from './components/JobBoard';
 import './App.css'
 
 function App() {
@@ -143,247 +145,257 @@ function App() {
   };
 
   return (
-    <div className="app">
-      <header className="header">
-        <div className="logo">AgoraJobs</div>
-        <nav className="headers">
-          <a href="#about">About</a>
-          <a href="#employers">Employers</a>
-          <a href="#contact">Contact</a>
-          <a href="#login">Login</a>
-        </nav>
-      </header>
+    <Router>
+      <div className="app">
+        <header className="header">
+          <div className="logo">AgoraJobs</div>
+          <nav className="headers">
+            <Link to="/">Home</Link>
+            <Link to="/jobs">Jobs</Link>
+            <a href="#employers">Employers</a>
+            <a href="#contact">Contact</a>
+            <a href="#login">Login</a>
+          </nav>
+        </header>
 
-      {/* Hero Section */}
-      <section className="hero-section">
-        <div className="hero-content">
-          <h1>Your bridge to startup opportunities.</h1>
-          <p className="hero-subtitle">Connect with innovative startups, land your dream internship or job, and kickstart your career journey.</p>
-          <button className="cta-button">Get Started - It's Free!</button>
-          <div className="trust-badge">
-            <span>⭐️⭐️⭐️⭐️⭐️</span>
-            <p>Trusted by 1000+ students and 100+ startups</p>
-          </div>
-        </div>
-      </section>
+        <Routes>
+          <Route path="/" element={
+            <>
+              {/* Hero Section */}
+              <section className="hero-section">
+                <div className="hero-content">
+                  <h1>Your bridge to startup opportunities.</h1>
+                  <p className="hero-subtitle">Connect with innovative startups, land your dream internship or job, and kickstart your career journey.</p>
+                  <button className="cta-button">Get Started - It's Free!</button>
+                  <div className="trust-badge">
+                    <span>⭐️⭐️⭐️⭐️⭐️</span>
+                    <p>Trusted by 1000+ students and 100+ startups</p>
+                  </div>
+                </div>
+              </section>
 
-      {/* Features Section */}
-      <section className="features-section">
-        <h2>Why Choose AgoraJobs?</h2>
-        <div className="features-grid">
-          <div className="feature-card">
-            <div className="feature-icon">🎯</div>
-            <h3>Personalized Matching</h3>
-            <p>AI-powered job matching based on your skills and interests</p>
-          </div>
-          <div className="feature-card">
-            <div className="feature-icon">🚀</div>
-            <h3>Startup Focus</h3>
-            <p>Exclusive opportunities with vetted, growing startups</p>
-          </div>
-          <div className="feature-card">
-            <div className="feature-icon">📝</div>
-            <h3>Easy Applications</h3>
-            <p>One profile, seamless applications to multiple positions</p>
-          </div>
-        </div>
-      </section>
+              {/* Features Section */}
+              <section className="features-section">
+                <h2>Why Choose AgoraJobs?</h2>
+                <div className="features-grid">
+                  <div className="feature-card">
+                    <div className="feature-icon">🎯</div>
+                    <h3>Personalized Matching</h3>
+                    <p>AI-powered job matching based on your skills and interests</p>
+                  </div>
+                  <div className="feature-card">
+                    <div className="feature-icon">🚀</div>
+                    <h3>Startup Focus</h3>
+                    <p>Exclusive opportunities with vetted, growing startups</p>
+                  </div>
+                  <div className="feature-card">
+                    <div className="feature-icon">📝</div>
+                    <h3>Easy Applications</h3>
+                    <p>One profile, seamless applications to multiple positions</p>
+                  </div>
+                </div>
+              </section>
 
-      {/* Stats Section with Animation */}
-      <section className="stats-section">
-        <div className="stat-item">
-          <div className="stat-number">500+</div>
-          <p>Active Students</p>
-        </div>
-        <div className="stat-item">
-          <div className="stat-number">100+</div>
-          <p>Partner Startups</p>
-        </div>
-        <div className="stat-item">
-          <div className="stat-number">200+</div>
-          <p>Successful Placements</p>
-        </div>
-      </section>
+              {/* Stats Section with Animation */}
+              <section className="stats-section">
+                <div className="stat-item">
+                  <div className="stat-number">500+</div>
+                  <p>Active Students</p>
+                </div>
+                <div className="stat-item">
+                  <div className="stat-number">100+</div>
+                  <p>Partner Startups</p>
+                </div>
+                <div className="stat-item">
+                  <div className="stat-number">200+</div>
+                  <p>Successful Placements</p>
+                </div>
+              </section>
 
-      {/* How It Works Section */}
-      <section className="how-it-works">
-        <h2>How It Works</h2>
-        <div className="steps-container">
-          <div className="step">
-            <div className="step-number">1</div>
-            <h3>Create Your Profile</h3>
-            <p>Sign up and build your professional profile highlighting your skills and interests</p>
-          </div>
-          <div className="step">
-            <div className="step-number">2</div>
-            <h3>Get Matched</h3>
-            <p>Our AI matches you with relevant startup opportunities</p>
-          </div>
-          <div className="step">
-            <div className="step-number">3</div>
-            <h3>Apply & Connect</h3>
-            <p>Apply with one click and connect directly with startup founders</p>
-          </div>
-        </div>
-      </section>
+              {/* How It Works Section */}
+              <section className="how-it-works">
+                <h2>How It Works</h2>
+                <div className="steps-container">
+                  <div className="step">
+                    <div className="step-number">1</div>
+                    <h3>Create Your Profile</h3>
+                    <p>Sign up and build your professional profile highlighting your skills and interests</p>
+                  </div>
+                  <div className="step">
+                    <div className="step-number">2</div>
+                    <h3>Get Matched</h3>
+                    <p>Our AI matches you with relevant startup opportunities</p>
+                  </div>
+                  <div className="step">
+                    <div className="step-number">3</div>
+                    <h3>Apply & Connect</h3>
+                    <p>Apply with one click and connect directly with startup founders</p>
+                  </div>
+                </div>
+              </section>
 
-      {/* Sign Up Section */}
-      <section className="signup-section">
-        <h2>Join AgoraJobs Today</h2>
-        <p>Start your journey towards exciting startup opportunities</p>
-        <form onSubmit={handleSubmit} className="signup-form">
-          <div className="form-grid">
-            <div className="form-group">
-              <label htmlFor="name">Full Name</label>
-              <input
-                type="text"
-                id="name"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                required
-              />
+              {/* Sign Up Section */}
+              <section className="signup-section">
+                <h2>Join AgoraJobs Today</h2>
+                <p>Start your journey towards exciting startup opportunities</p>
+                <form onSubmit={handleSubmit} className="signup-form">
+                  <div className="form-grid">
+                    <div className="form-group">
+                      <label htmlFor="name">Full Name</label>
+                      <input
+                        type="text"
+                        id="name"
+                        name="name"
+                        value={formData.name}
+                        onChange={handleChange}
+                        required
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label htmlFor="email">Email</label>
+                      <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        value={formData.email}
+                        onChange={handleChange}
+                        required
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label htmlFor="university">University</label>
+                      <input
+                        type="text"
+                        id="university"
+                        name="university"
+                        value={formData.university}
+                        onChange={handleChange}
+                        required
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label htmlFor="graduation">Expected Graduation</label>
+                      <input
+                        type="month"
+                        id="graduation"
+                        name="graduation"
+                        value={formData.graduation}
+                        onChange={handleChange}
+                        required
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label htmlFor="role">I am a:</label>
+                      <select
+                        id="role"
+                        name="role"
+                        value={formData.role}
+                        onChange={handleChange}
+                      >
+                        <option value="student">Student</option>
+                        <option value="startup">Startup</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <button type="submit" className="submit-button">Create Account</button>
+                </form>
+              </section>
+
+              {/* FAQ Section */}
+              <section className="faq-section">
+                <h2>Got questions?</h2>
+                <p className="faq-subtitle">Explore our FAQ section to learn more.</p>
+                
+                <div className="faq-container">
+                  <div className={`faq-item ${activeQuestion === 0 ? 'active' : ''}`} onClick={() => toggleQuestion(0)}>
+                    <div className="faq-question">
+                      <span className="question-icon">💭</span>
+                      <h3>Is AgoraJobs free? How do you make money?</h3>
+                      <span className="toggle-icon">{activeQuestion === 0 ? '−' : '+'}</span>
+                    </div>
+                    <div className="faq-answer">
+                      <p>The base version of AgoraJobs is and will be free forever. We make money by charging companies to post jobs and promote their openings. We don't sell your data. We also offer a premium subscription with additional AI features to enhance your job search.</p>
+                    </div>
+                  </div>
+
+                  <div className={`faq-item ${activeQuestion === 1 ? 'active' : ''}`} onClick={() => toggleQuestion(1)}>
+                    <div className="faq-question">
+                      <span className="question-icon">🎯</span>
+                      <h3>How does AgoraJobs work?</h3>
+                      <span className="toggle-icon">{activeQuestion === 1 ? '−' : '+'}</span>
+                    </div>
+                    <div className="faq-answer">
+                      <p>Our platform uses AI to match students with startup opportunities based on their skills, interests, and experience. Create a profile, and we'll connect you with relevant positions at vetted startups. Apply with one click and communicate directly with founders.</p>
+                    </div>
+                  </div>
+
+                  <div className={`faq-item ${activeQuestion === 2 ? 'active' : ''}`} onClick={() => toggleQuestion(2)}>
+                    <div className="faq-question">
+                      <span className="question-icon">🔒</span>
+                      <h3>How does AgoraJobs handle my data?</h3>
+                      <span className="toggle-icon">{activeQuestion === 2 ? '−' : '+'}</span>
+                    </div>
+                    <div className="faq-answer">
+                      <p>We take data privacy seriously. Your information is securely stored and only shared with startups when you apply to their positions. We never sell your data to third parties and comply with all relevant data protection regulations.</p>
+                    </div>
+                  </div>
+
+                  <div className={`faq-item ${activeQuestion === 3 ? 'active' : ''}`} onClick={() => toggleQuestion(3)}>
+                    <div className="faq-question">
+                      <span className="question-icon">🎓</span>
+                      <h3>What kind of opportunities can I find on AgoraJobs?</h3>
+                      <span className="toggle-icon">{activeQuestion === 3 ? '−' : '+'}</span>
+                    </div>
+                    <div className="faq-answer">
+                      <p>We offer a wide range of opportunities including internships, full-time positions, and part-time roles across various sectors in the startup ecosystem. From tech to marketing, business development to design - we've got opportunities for diverse skill sets.</p>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <TestimonialsSection />
+            </>
+          } />
+          <Route path="/jobs" element={<JobBoard />} />
+        </Routes>
+
+        {/* Footer */}
+        <footer className="footer">
+          <div className="footer-content">
+            <div className="footer-section">
+              <h4>AgoraJobs</h4>
+              <p>Connecting ambitious students with innovative startups</p>
             </div>
-
-            <div className="form-group">
-              <label htmlFor="email">Email</label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                required
-              />
+            
+            <div className="footer-section">
+              <h4>Quick Links</h4>
+              <div className="footer-links">
+                <a href="#about">About Us</a>
+                <a href="#browse">Browse Jobs</a>
+                <a href="#startups">For Startups</a>
+              </div>
             </div>
-
-            <div className="form-group">
-              <label htmlFor="university">University</label>
-              <input
-                type="text"
-                id="university"
-                name="university"
-                value={formData.university}
-                onChange={handleChange}
-                required
-              />
+            
+            <div className="footer-section">
+              <h4>Contact</h4>
+              <p>hello@agorajobs.com</p>
+              <div className="social-links">
+                <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+              </div>
             </div>
-
-            <div className="form-group">
-              <label htmlFor="graduation">Expected Graduation</label>
-              <input
-                type="month"
-                id="graduation"
-                name="graduation"
-                value={formData.graduation}
-                onChange={handleChange}
-                required
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="role">I am a:</label>
-              <select
-                id="role"
-                name="role"
-                value={formData.role}
-                onChange={handleChange}
-              >
-                <option value="student">Student</option>
-                <option value="startup">Startup</option>
-              </select>
-            </div>
-          </div>
-
-          <button type="submit" className="submit-button">Create Account</button>
-        </form>
-      </section>
-
-      {/* FAQ Section */}
-      <section className="faq-section">
-        <h2>Got questions?</h2>
-        <p className="faq-subtitle">Explore our FAQ section to learn more.</p>
-        
-        <div className="faq-container">
-          <div className={`faq-item ${activeQuestion === 0 ? 'active' : ''}`} onClick={() => toggleQuestion(0)}>
-            <div className="faq-question">
-              <span className="question-icon">💭</span>
-              <h3>Is AgoraJobs free? How do you make money?</h3>
-              <span className="toggle-icon">{activeQuestion === 0 ? '−' : '+'}</span>
-            </div>
-            <div className="faq-answer">
-              <p>The base version of AgoraJobs is and will be free forever. We make money by charging companies to post jobs and promote their openings. We don't sell your data. We also offer a premium subscription with additional AI features to enhance your job search.</p>
-            </div>
-          </div>
-
-          <div className={`faq-item ${activeQuestion === 1 ? 'active' : ''}`} onClick={() => toggleQuestion(1)}>
-            <div className="faq-question">
-              <span className="question-icon">🎯</span>
-              <h3>How does AgoraJobs work?</h3>
-              <span className="toggle-icon">{activeQuestion === 1 ? '−' : '+'}</span>
-            </div>
-            <div className="faq-answer">
-              <p>Our platform uses AI to match students with startup opportunities based on their skills, interests, and experience. Create a profile, and we'll connect you with relevant positions at vetted startups. Apply with one click and communicate directly with founders.</p>
-            </div>
-          </div>
-
-          <div className={`faq-item ${activeQuestion === 2 ? 'active' : ''}`} onClick={() => toggleQuestion(2)}>
-            <div className="faq-question">
-              <span className="question-icon">🔒</span>
-              <h3>How does AgoraJobs handle my data?</h3>
-              <span className="toggle-icon">{activeQuestion === 2 ? '−' : '+'}</span>
-            </div>
-            <div className="faq-answer">
-              <p>We take data privacy seriously. Your information is securely stored and only shared with startups when you apply to their positions. We never sell your data to third parties and comply with all relevant data protection regulations.</p>
-            </div>
-          </div>
-
-          <div className={`faq-item ${activeQuestion === 3 ? 'active' : ''}`} onClick={() => toggleQuestion(3)}>
-            <div className="faq-question">
-              <span className="question-icon">🎓</span>
-              <h3>What kind of opportunities can I find on AgoraJobs?</h3>
-              <span className="toggle-icon">{activeQuestion === 3 ? '−' : '+'}</span>
-            </div>
-            <div className="faq-answer">
-              <p>We offer a wide range of opportunities including internships, full-time positions, and part-time roles across various sectors in the startup ecosystem. From tech to marketing, business development to design - we've got opportunities for diverse skill sets.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <TestimonialsSection />
-
-      {/* Footer */}
-      <footer className="footer">
-        <div className="footer-content">
-          <div className="footer-section">
-            <h4>AgoraJobs</h4>
-            <p>Connecting ambitious students with innovative startups</p>
           </div>
           
-          <div className="footer-section">
-            <h4>Quick Links</h4>
-            <div className="footer-links">
-              <a href="#about">About Us</a>
-              <a href="#browse">Browse Jobs</a>
-              <a href="#startups">For Startups</a>
-            </div>
+          <div className="footer-bottom">
+            <p>&copy; 2024 AgoraJobs. All rights reserved.</p>
           </div>
-          
-          <div className="footer-section">
-            <h4>Contact</h4>
-            <p>hello@agorajobs.com</p>
-            <div className="social-links">
-              <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer">LinkedIn</a>
-            </div>
-          </div>
-        </div>
-        
-        <div className="footer-bottom">
-          <p>&copy; 2024 AgoraJobs. All rights reserved.</p>
-        </div>
-      </footer>
-    </div>
+        </footer>
+      </div>
+    </Router>
   )
 }
 
