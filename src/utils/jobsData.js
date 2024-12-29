@@ -50,4 +50,25 @@ export async function fetchJobs() {
     console.error('Error fetching jobs:', error);
     return [];
   }
+}
+
+export async function appendJob(newJob) {
+  try {
+    const response = await fetch('/api/jobs', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(newJob)
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to post job');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error appending job:', error);
+    throw error;
+  }
 } 
