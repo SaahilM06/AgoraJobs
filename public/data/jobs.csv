@@ -1,0 +1,11 @@
+job_id,company_id,company_name,posting_date,closing_date,job_description,job_type,salary_range,location,remote_option,experience_level,skills_required,industry
+1,C001,TechSolutions Inc.,2024-12-01,2025-01-15,Assist in developing AI models.,Paid Internship,$20-$25/hr,"Austin, TX",Yes,Entry-level,"Python, Machine Learning",Technology
+2,C002,GreenEarth Co.,2024-12-02,2025-02-01,Support environmental data analysis.,Paid Internship,$18-$22/hr,Remote,Yes,Entry-level,"R, Data Visualization",Environment
+3,C003,HealthFirst,2024-12-05,2025-01-20,Work on healthcare app design.,Paid Internship,$15-$20/hr,"Austin, TX",No,Entry-level,"UI/UX Design, Figma",Healthcare
+4,C004,EdTechPros,2024-12-03,2025-01-25,Develop e-learning modules.,Paid Internship,$22-$28/hr,Remote,Yes,Entry-level,"JavaScript, HTML/CSS",Education
+5,C005,BioGenics,2024-12-04,2025-01-30,Conduct bioinformatics research.,Paid Internship,$25-$30/hr,"San Francisco, CA",No,Entry-level,"Python, Bioinformatics",Biotechnology
+6,C006,Finance360,2024-12-06,2025-02-10,Analyze financial datasets.,Paid Internship,$20-$25/hr,"New York, NY",No,Entry-level,"Excel, SQL",Finance
+7,C007,StartUpHub,2024-12-07,2025-01-22,Assist with startup consultations.,Paid Internship,$18-$24/hr,Remote,Yes,Entry-level,"Business Analysis, Communication",Consulting
+8,C008,CleanEnergy Innovations,2024-12-08,2025-01-31,Work on sustainable energy projects.,Paid Internship,$22-$26/hr,"Seattle, WA",Yes,Entry-level,"Project Management, Excel",Energy
+9,C009,TechCorp,2024-12-09,2025-02-05,Support cloud platform development.,Paid Internship,$24-$30/hr,"Austin, TX",No,Entry-level,"AWS, Python",Technology
+10,C010,CreativeMedia,2024-12-10,2025-01-27,Design marketing campaigns.,Paid Internship,$20-$25/hr,"Los Angeles, CA",Yes,Entry-level,"Adobe Suite, SEO",Media

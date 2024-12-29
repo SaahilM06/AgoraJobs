@@ -1,6 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { fetchJobs } from '../utils/jobsData';
+
+const DEFAULT_LOGO = 'https://via.placeholder.com/80?text=Logo';
 
 function JobBoard() {
+  const [jobs, setJobs] = useState([]);
   const [selectedJob, setSelectedJob] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState({
@@ -12,35 +16,18 @@ function JobBoard() {
   const [showApplyPopup, setShowApplyPopup] = useState(false);
   const [resumeFile, setResumeFile] = useState(null);
   
-  // Sample job data - in a real app, this would come from an API
-  const jobs = [
-    {
-      id: 1,
-      title: "Product Manager",
-      company: "Texas Momentum",
-      description: "Accelerator for early-stage student startups",
-      location: "Austin, TX, USA",
-      salary_range: "$20-30/hr",
-      industry: "Technology",
-      experience_level: "Entry Level",
-      logo: "/path/to/logo.png",
-      posting_date: "2024-03-15",
-      closing_date: "2024-04-15",
-      job_type: "Full-time",
-      remote_option: "Hybrid",
-      skills_required: ["Product Management", "Agile", "Data Analysis", "User Research"],
-      fullDescription: {
-        opportunity: "Companies can write whatever they want here. Number of sections and names of sections can be up to the company. Same for 'About the Company' page.",
-        responsibilities: [
-          "Bullet pointed list of responsibilities"
-        ],
-        qualifications: [
-          "Bullet pointed list of required or preferred qualifications"
-        ]
-      }
-    },
-    // Add more sample jobs here
-  ];
+  useEffect(() => {
+    const loadJobs = async () => {
+      const jobsData = await fetchJobs();
+      setJobs(jobsData);
+    };
+
+    loadJobs();
+    // Poll for updates every 5 minutes
+    const interval = setInterval(loadJobs, 5 * 60 * 1000);
+    
+    return () => clearInterval(interval);
+  }, []);
 
   const handleFilterChange = (filterType, value) => {
     setFilters(prev => ({
@@ -144,7 +131,11 @@ function JobBoard() {
                 onClick={() => setSelectedJob(job)}
               >
                 <div className="job-card-logo">
-                  <img src={job.logo} alt={`${job.company} logo`} />
+                  <img 
+                    src={job.logo} 
+                    alt={`${job.company} logo`}
+                    onError={(e) => { e.target.src = DEFAULT_LOGO }}
+                  />
                 </div>
                 <div className="job-card-content">
                   <h3>{job.title}</h3>
@@ -163,7 +154,11 @@ function JobBoard() {
             {selectedJob ? (
               <>
                 <div className="job-header">
-                  <img src={selectedJob.logo} alt={`${selectedJob.company} logo`} />
+                  <img 
+                    src={selectedJob.logo} 
+                    alt={`${selectedJob.company} logo`}
+                    onError={(e) => { e.target.src = DEFAULT_LOGO }}
+                  />
                   <div className="job-header-content">
                     <h2>{selectedJob.title}</h2>
                     <h3>{selectedJob.company}</h3>
