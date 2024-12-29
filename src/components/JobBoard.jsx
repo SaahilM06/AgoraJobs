@@ -20,10 +20,15 @@ function JobBoard() {
       company: "Texas Momentum",
       description: "Accelerator for early-stage student startups",
       location: "Austin, TX, USA",
-      salary: "$20-30/hr",
+      salary_range: "$20-30/hr",
       industry: "Technology",
-      experience: "Entry Level",
+      experience_level: "Entry Level",
       logo: "/path/to/logo.png",
+      posting_date: "2024-03-15",
+      closing_date: "2024-04-15",
+      job_type: "Full-time",
+      remote_option: "Hybrid",
+      skills_required: ["Product Management", "Agile", "Data Analysis", "User Research"],
       fullDescription: {
         opportunity: "Companies can write whatever they want here. Number of sections and names of sections can be up to the company. Same for 'About the Company' page.",
         responsibilities: [
@@ -68,8 +73,8 @@ function JobBoard() {
     
     const matchesIndustry = !filters.industry || job.industry === filters.industry;
     const matchesLocation = !filters.location || job.location.includes(filters.location);
-    const matchesSalary = !filters.salary || job.salary.includes(filters.salary);
-    const matchesExperience = !filters.experience || job.experience === filters.experience;
+    const matchesSalary = !filters.salary || job.salary_range.includes(filters.salary);
+    const matchesExperience = !filters.experience || job.experience_level === filters.experience;
 
     return matchesSearch && matchesIndustry && matchesLocation && 
            matchesSalary && matchesExperience;
@@ -146,7 +151,7 @@ function JobBoard() {
                   <h4>{job.company}</h4>
                   <p>{job.description}</p>
                   <div className="job-card-footer">
-                    <span>{job.salary}</span>
+                    <span>{job.salary_range}</span>
                     <span>{job.location}</span>
                   </div>
                 </div>
@@ -163,7 +168,7 @@ function JobBoard() {
                     <h2>{selectedJob.title}</h2>
                     <h3>{selectedJob.company}</h3>
                     <div className="job-header-info">
-                      <span>{selectedJob.salary}</span>
+                      <span>{selectedJob.salary_range}</span>
                       <span>{selectedJob.location}</span>
                     </div>
                   </div>
@@ -174,7 +179,45 @@ function JobBoard() {
                     Apply now!
                   </button>
                 </div>
-                
+
+                <div className="job-meta-details">
+                  <div className="meta-grid">
+                    <div className="meta-item">
+                      <span className="label">Posted</span>
+                      <span>{new Date(selectedJob.posting_date).toLocaleDateString()}</span>
+                    </div>
+                    <div className="meta-item">
+                      <span className="label">Closing Date</span>
+                      <span>{new Date(selectedJob.closing_date).toLocaleDateString()}</span>
+                    </div>
+                    <div className="meta-item">
+                      <span className="label">Job Type</span>
+                      <span>{selectedJob.job_type}</span>
+                    </div>
+                    <div className="meta-item">
+                      <span className="label">Remote Option</span>
+                      <span>{selectedJob.remote_option}</span>
+                    </div>
+                    <div className="meta-item">
+                      <span className="label">Experience Level</span>
+                      <span>{selectedJob.experience_level}</span>
+                    </div>
+                    <div className="meta-item">
+                      <span className="label">Industry</span>
+                      <span>{selectedJob.industry}</span>
+                    </div>
+                  </div>
+
+                  <div className="required-skills">
+                    <h3>Required Skills</h3>
+                    <div className="skills-list">
+                      {selectedJob.skills_required.map((skill, index) => (
+                        <span key={index} className="skill-tag">{skill}</span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
                 <div className="job-tabs">
                   <button className="tab active">About the Position</button>
                   <button className="tab">About the Company</button>
