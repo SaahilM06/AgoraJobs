@@ -1,0 +1,3 @@
+user_id,email,password,full_name,role,university,graduation
+U001,john.doe@example.com,password123,John Doe,student,Harvard University,2025-06
+U002,jane.smith@example.com,securepass,Jane Smith,student,MIT,2024-05 

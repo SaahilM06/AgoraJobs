@@ -1,0 +1,3 @@
+company_id,email,password,company_name,industry,description,headquarters,website,logo_url
+C001,"demo@example.com","password",TechSolutions Inc.,Technology,Leading AI solutions provider,Austin TX,https://techsolutions.com,/company-logos/C001.png
+C002,"green@earth.com","password123",GreenEarth Co.,Environment,Sustainable solutions for a better future,Seattle WA,https://greenearth.com,/company-logos/C002.png

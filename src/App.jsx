@@ -3,6 +3,8 @@ import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import JobBoard from './components/JobBoard';
 import EmployerPortal from './components/EmployerPortal';
 import EmployerDashboard from './components/EmployerDashboard';
+import UserPortal from './components/UserPortal';
+import UserDashboard from './components/UserDashboard';
 import './App.css'
 
 function App() {
@@ -156,7 +158,11 @@ function App() {
             <Link to="/jobs">Jobs</Link>
             <Link to="/employer">Employers</Link>
             <a href="#contact">Contact</a>
-            <a href="#login">Login</a>
+            {localStorage.getItem('userLoggedIn') ? (
+              <Link to="/dashboard">Dashboard</Link>
+            ) : (
+              <Link to="/login">Login</Link>
+            )}
           </nav>
         </header>
 
@@ -366,6 +372,8 @@ function App() {
           <Route path="/jobs" element={<JobBoard />} />
           <Route path="/employer" element={<EmployerPortal />} />
           <Route path="/employer/dashboard" element={<EmployerDashboard />} />
+          <Route path="/login" element={<UserPortal />} />
+          <Route path="/dashboard" element={<UserDashboard />} />
         </Routes>
 
         {/* Footer */}
