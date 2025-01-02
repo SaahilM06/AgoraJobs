@@ -7,6 +7,7 @@ import CompanyProfile from './components/CompanyProfile';
 import UserPortal from './components/UserPortal';
 import UserDashboard from './components/UserDashboard';
 import './App.css'
+<<<<<<< Updated upstream
 import UserSignup from './components/UserSignup';
 
 // Import the functions you need from the SDKs you need
@@ -30,6 +31,9 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
+=======
+import UserSignUp from './components/UserSignUp';
+>>>>>>> Stashed changes
 
 function App() {
   const [formData, setFormData] = useState({
@@ -399,8 +403,12 @@ function App() {
           <Route path="/employer/profile" element={<CompanyProfile />} />
           <Route path="/login" element={<UserPortal />} />
           <Route path="/dashboard" element={<UserDashboard />} />
+<<<<<<< Updated upstream
           <Route path="/signup" element={<UserSignup />} />
 
+=======
+          <Route path="/signup" element={<UserSignUp />} />
+>>>>>>> Stashed changes
         </Routes>
 
         {/* Footer */}
