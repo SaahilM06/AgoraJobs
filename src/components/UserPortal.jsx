@@ -17,13 +17,11 @@ function UserPortal() {
     try {
       const result = await authenticateUser(credentials.email, credentials.password);
       if (result.success) {
-        // Store user info in localStorage
         localStorage.setItem('userLoggedIn', 'true');
         localStorage.setItem('userId', result.userId);
         localStorage.setItem('userFullName', result.fullName);
         localStorage.setItem('userRole', result.role);
 
-        // Redirect to user dashboard
         navigate('/dashboard');
       }
     } catch (error) {
@@ -32,7 +30,6 @@ function UserPortal() {
   };
 
   const handleSignUp = () => {
-    // Navigate to the Sign Up page
     navigate('/signup');
   };
 

@@ -167,17 +167,19 @@
   font-size: 1rem;
 }
 
-/* Add these new styles to your existing App.css */
-
 .welcome-section,
 .mission-section,
 .support-section,
 .stats-section,
 .signup-section {
-  padding: 4rem 2rem;
-  text-align: center;
-  max-width: 1200px;
-  margin: 0 auto;
+  background: linear-gradient(135deg, #F0F7FF 0%, #FFFFFF 100%);
+  margin-top: -4rem;
+  padding: 10rem 0; 
+  clip-path: polygon(0 8%, 100% 0, 100% 100%, 0 92%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 80px); 
 }
 
 .welcome-section h1 {
@@ -243,9 +245,15 @@
   background: transparent;
 }
 
-.signup-section {
-  background-color: #f8f9fa;
-  padding-bottom: 6rem;
+.signup-container {
+  max-width: 500px;
+  width: 100%;
+  margin: 2rem auto; 
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  padding: 2rem;
+  animation: fadeInUp 0.8s ease forwards;
 }
 
 .signup-form {
@@ -918,29 +926,6 @@ section {
   position: relative;
   overflow: hidden;
 }
-
-.button-group {
-  display: flex;
-  justify-content: center;
-  margin-top: 1.5rem;
-}
-
-.secondary-button {
-  background-color: #f8f9fa;
-  color: #007bff;
-  border: 1px solid #007bff;
-  padding: 0.75rem 1.5rem;
-  border-radius: 4px;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.secondary-button:hover {
-  background-color: #007bff;
-  color: white;
-}
-
 
 .testimonials-section h2 {
   text-align: center;
@@ -1927,7 +1912,7 @@ section {
   margin-top: 2rem;
 }
 
-/* Update existing dashboard buttons */
+
 .edit-profile {
   @extend .secondary-button;
 }
@@ -1937,4 +1922,117 @@ section {
   @extend .secondary-button;
   padding: 0.5rem 1rem;
   font-size: 0.875rem;
+}
+
+.signup-container {
+  max-width: 500px;
+  width: 100%;
+  margin: 4rem auto; 
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  padding: 3rem; 
+  animation: fadeInUp 0.8s ease forwards;
+}
+
+.signup-container h2 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--primary);
+  margin-bottom: 2rem; 
+  text-align: center;
+}
+
+.form-group {
+  margin-bottom: 1.25rem; 
+}
+
+.form-group label {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #333;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.2s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  border-color: var(--primary);
+  outline: none;
+  background: #f9fcff;
+}
+
+.error-message {
+  color: #dc3545;
+  font-size: 0.9rem;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.submit-button {
+  background-color: var(--primary);
+  color: white;
+  padding: 0.75rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  width: 100%;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.submit-button:hover {
+  background-color: #0052cc;
+}
+
+.secondary-button {
+  background-color: #f8f9fa;
+  color: var(--primary);
+  border: 1px solid var(--primary);
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 1rem;
+  transition: all 0.2s ease;
+}
+
+.secondary-button:hover {
+  background-color: var(--primary);
+  color: white;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .signup-container {
+    padding: 1.5rem;
+  }
+
+  .signup-container h2 {
+    font-size: 1.75rem;
+  }
+
+  .form-group input,
+  .form-group select {
+    padding: 0.5rem;
+    font-size: 0.9rem;
+  }
+
+  .submit-button,
+  .secondary-button {
+    padding: 0.5rem;
+    font-size: 0.9rem;
+  }
 }

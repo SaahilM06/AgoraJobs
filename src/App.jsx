@@ -7,6 +7,29 @@ import CompanyProfile from './components/CompanyProfile';
 import UserPortal from './components/UserPortal';
 import UserDashboard from './components/UserDashboard';
 import './App.css'
+import UserSignup from './components/UserSignup';
+
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyAadRo8N9YvV-nW_f0bzN6S7KDHMC9oV2k",
+  authDomain: "agora-job-board.firebaseapp.com",
+  projectId: "agora-job-board",
+  storageBucket: "agora-job-board.firebasestorage.app",
+  messagingSenderId: "672034564989",
+  appId: "1:672034564989:web:336f20c1f0fb657dbafa14",
+  measurementId: "G-2PW1EEEF8B"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
 
 function App() {
   const [formData, setFormData] = useState({
@@ -376,6 +399,8 @@ function App() {
           <Route path="/employer/profile" element={<CompanyProfile />} />
           <Route path="/login" element={<UserPortal />} />
           <Route path="/dashboard" element={<UserDashboard />} />
+          <Route path="/signup" element={<UserSignup />} />
+
         </Routes>
 
         {/* Footer */}
