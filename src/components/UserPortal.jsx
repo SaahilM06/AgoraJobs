@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { authenticateUser } from '../utils/userData';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../firebaseConfig';
 
 function UserPortal() {
   const [credentials, setCredentials] = useState({
@@ -15,15 +16,18 @@ function UserPortal() {
     setError('');
 
     try {
-      const result = await authenticateUser(credentials.email, credentials.password);
-      if (result.success) {
-        localStorage.setItem('userLoggedIn', 'true');
-        localStorage.setItem('userId', result.userId);
-        localStorage.setItem('userFullName', result.fullName);
-        localStorage.setItem('userRole', result.role);
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        credentials.email,
+        credentials.password
+      );
+      const { user } = userCredential;
 
-        navigate('/dashboard');
-      }
+      localStorage.setItem('userLoggedIn', 'true');
+      localStorage.setItem('userId', user.uid);
+      localStorage.setItem('userEmail', user.email);
+
+      navigate('/dashboard');
     } catch (error) {
       setError('Invalid email or password');
     }
