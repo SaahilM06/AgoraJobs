@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { authenticateUser, testDataAccess } from '../utils/userData';
+import { authenticateUser } from '../utils/userData';
 
 function UserPortal() {
   const [credentials, setCredentials] = useState({
     email: '',
-    password: ''
+    password: '',
   });
   const [error, setError] = useState('');
   const navigate = useNavigate();
@@ -22,13 +22,18 @@ function UserPortal() {
         localStorage.setItem('userId', result.userId);
         localStorage.setItem('userFullName', result.fullName);
         localStorage.setItem('userRole', result.role);
-        
+
         // Redirect to user dashboard
         navigate('/dashboard');
       }
     } catch (error) {
       setError('Invalid email or password');
     }
+  };
+
+  const handleSignUp = () => {
+    // Navigate to the Sign Up page
+    navigate('/signup');
   };
 
   return (
@@ -41,10 +46,12 @@ function UserPortal() {
             <input
               type="email"
               value={credentials.email}
-              onChange={(e) => setCredentials(prev => ({
-                ...prev,
-                email: e.target.value
-              }))}
+              onChange={(e) =>
+                setCredentials((prev) => ({
+                  ...prev,
+                  email: e.target.value,
+                }))
+              }
               required
             />
           </div>
@@ -53,16 +60,25 @@ function UserPortal() {
             <input
               type="password"
               value={credentials.password}
-              onChange={(e) => setCredentials(prev => ({
-                ...prev,
-                password: e.target.value
-              }))}
+              onChange={(e) =>
+                setCredentials((prev) => ({
+                  ...prev,
+                  password: e.target.value,
+                }))
+              }
               required
             />
           </div>
           {error && <div className="error-message">{error}</div>}
-          <button type="submit" className="submit-button">Login</button>
+          <button type="submit" className="submit-button">
+            Login
+          </button>
         </form>
+        <div className="button-group">
+          <button onClick={handleSignUp} className="secondary-button">
+            Sign Up
+          </button>
+        </div>
       </div>
     </div>
   );
