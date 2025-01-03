@@ -1,74 +1,79 @@
-import Papa from 'papaparse';
+import { getFirestore, collection, getDocs, addDoc } from 'firebase/firestore';
+import app from '../firebaseConfig';
+
+const db = getFirestore(app);
 
 export async function fetchJobs() {
   try {
-    const response = await fetch('/data/jobs.csv');
-    const csvText = await response.text();
+    const jobsCollection = collection(db, 'agorajobs-postingdetails');
+    const querySnapshot = await getDocs(jobsCollection);
     
-    return new Promise((resolve) => {
-      Papa.parse(csvText, {
-        header: true,
-        complete: (results) => {
-          const jobs = results.data
-            .filter(row => row.job_id) // Filter out empty rows
-            .map(row => ({
-              id: row.job_id,
-              title: row.job_description.split('.')[0], // Use first sentence as title
-              company: row.company_name,
-              description: row.job_description,
-              posting_date: row.posting_date,
-              closing_date: row.closing_date,
-              job_type: row.job_type,
-              salary_range: row.salary_range,
-              location: row.location,
-              remote_option: row.remote_option,
-              experience_level: row.experience_level,
-              skills_required: row.skills_required.split(',').map(skill => skill.trim()),
-              industry: row.industry,
-              logo: `/company-logos/${row.company_id}.png`,
-              fullDescription: {
-                opportunity: row.job_description,
-                responsibilities: [
-                  "Review and understand project requirements",
-                  "Collaborate with team members",
-                  "Contribute to project deliverables",
-                  "Participate in team meetings"
-                ],
-                qualifications: [
-                  "Currently enrolled in related degree program",
-                  "Strong analytical and problem-solving skills",
-                  "Excellent communication skills",
-                  "Ability to work independently and in a team"
-                ]
-              }
-            }));
-          resolve(jobs);
+    const jobs = querySnapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        title: data.job_description?.split('.')[0] || 'No Title', // Use first sentence as title
+        company: data.company_name,
+        description: data.job_description,
+        posting_date: data.posting_date,
+        closing_date: data.closing_date,
+        job_type: data.job_type,
+        salary_range: data.salary_range,
+        location: data.location,
+        remote_option: data.remote_option,
+        experience_level: data.experience_level,
+        skills_required: Array.isArray(data.skills_required) 
+          ? data.skills_required 
+          : data.skills_required?.split(',').map(skill => skill.trim()) || [],
+        industry: data.industry,
+        company_id: data.company_id,
+        logo: `/company-logos/${data.company_id}.png`,
+        fullDescription: {
+          opportunity: data.job_description,
+          responsibilities: [
+            "Review and understand project requirements",
+            "Collaborate with team members",
+            "Contribute to project deliverables",
+            "Participate in team meetings"
+          ],
+          qualifications: [
+            "Currently enrolled in related degree program",
+            "Strong analytical and problem-solving skills",
+            "Excellent communication skills",
+            "Ability to work independently and in a team"
+          ]
         }
-      });
+      };
     });
+
+    return jobs;
   } catch (error) {
-    console.error('Error fetching jobs:', error);
+    console.error('Error fetching jobs from Firestore:', error);
     return [];
   }
 }
 
 export async function appendJob(newJob) {
   try {
-    const response = await fetch('/api/jobs', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(newJob)
+    const jobsCollection = collection(db, 'agorajobs-postingdetails');
+    const docRef = await addDoc(jobsCollection, {
+      company_id: newJob.company_id,
+      company_name: newJob.company_name,
+      posting_date: new Date().toISOString(),
+      closing_date: newJob.closing_date,
+      job_description: newJob.job_description,
+      job_type: newJob.job_type,
+      salary_range: newJob.salary_range,
+      location: newJob.location,
+      remote_option: newJob.remote_option,
+      experience_level: newJob.experience_level,
+      skills_required: newJob.skills_required,
+      industry: newJob.industry
     });
 
-    if (!response.ok) {
-      throw new Error('Failed to post job');
-    }
-
-    return await response.json();
+    return { id: docRef.id, ...newJob };
   } catch (error) {
-    console.error('Error appending job:', error);
+    console.error('Error adding job to Firestore:', error);
     throw error;
   }
 } 
