@@ -1103,12 +1103,10 @@ section {
   position: sticky;
   top: 80px;
   background: white;
-  padding: 1rem 2rem;
-  z-index: 100;
+  padding: 1rem;
+  z-index: 10;
   border-bottom: 1px solid #eee;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .search-bar input {
@@ -1134,26 +1132,25 @@ section {
 /* Job Content Layout */
 .job-content {
   display: grid;
-  grid-template-columns: 400px 1fr;
-  max-width: 1400px;
-  margin: 0 auto;
-  width: 100%;
-  height: calc(100vh - 80px - 73px);
+  grid-template-columns: 1fr 1.5fr;
+  gap: 2rem;
+  padding: 1rem;
+  height: calc(100vh - 180px);
   background: white;
 }
 
 /* Job List Styles */
 .job-list {
-  border-right: 1px solid #eee;
   overflow-y: auto;
-  background: white;
+  padding-right: 1rem;
 }
 
 /* Job Details Styles */
 .job-details {
-  padding: 2rem;
   overflow-y: auto;
-  background: white;
+  height: 100%;
+  position: sticky;
+  top: 0;
 }
 
 .job-header {
@@ -1512,58 +1509,6 @@ section {
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   width: 100%;
   max-width: 400px;
-}
-
-.employer-dashboard {
-  padding: 6rem 2rem 2rem;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-.dashboard-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 2rem;
-}
-
-.add-job-button {
-  background: var(--primary);
-  color: white;
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 1rem;
-  font-weight: 600;
-}
-
-.job-form {
-  background: white;
-  padding: 2rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.form-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1.5rem;
-}
-
-.form-buttons {
-  display: flex;
-  gap: 1rem;
-  margin-top: 2rem;
-}
-
-.logout-button {
-  background: #dc3545;
-  color: white;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  cursor: pointer;
 }
 
 .user-dashboard {
