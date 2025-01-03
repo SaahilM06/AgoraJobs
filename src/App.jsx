@@ -5,6 +5,8 @@ import UserPortal from './components/UserPortal';
 import UserDashboard from './components/UserDashboard';
 import './App.css'
 import UserSignUp from './components/UserSignUp';
+import Welcome from './components/Welcome';
+import ProfileSetup from './components/ProfileSetup';
 
 function App() {
   const [formData, setFormData] = useState({
@@ -371,6 +373,8 @@ function App() {
           <Route path="/login" element={<UserPortal />} />
           <Route path="/dashboard" element={<UserDashboard />} />
           <Route path="/signup" element={<UserSignUp />} />
+          <Route path="/welcome" element={<Welcome />} />
+          <Route path="/setup-profile" element={<ProfileSetup />} />
         </Routes>
 
         {/* Footer */}

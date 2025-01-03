@@ -1,34 +1,125 @@
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 function UserDashboard() {
   const navigate = useNavigate();
-  
-  useEffect(() => {
-    const isLoggedIn = localStorage.getItem('userLoggedIn');
-    if (!isLoggedIn) {
-      navigate('/login');
-    }
-  }, [navigate]);
+  const [showProfileForm, setShowProfileForm] = useState(false);
+  const [profile, setProfile] = useState({
+    full_name: '',
+    university: '',
+    graduation: '',
+    role: 'student'
+  });
 
   const handleLogout = () => {
     localStorage.removeItem('userLoggedIn');
-    localStorage.removeItem('userId');
-    localStorage.removeItem('userFullName');
-    localStorage.removeItem('userRole');
     navigate('/login');
   };
 
+  const handleProfileSubmit = async (e) => {
+    e.preventDefault();
+    // Add API call to save profile data
+    console.log('Profile data:', profile);
+    setShowProfileForm(false);
+  };
+
   return (
-    <div className="user-dashboard">
+    <div className="dashboard-container">
       <div className="dashboard-header">
-        <h2>Welcome, {localStorage.getItem('userFullName')}</h2>
-        <button onClick={handleLogout} className="logout-button">Logout</button>
+        <h1>Welcome, {profile.full_name || 'User'}</h1>
+        <div className="dashboard-actions">
+          <button 
+            className="secondary-button"
+            onClick={() => setShowProfileForm(true)}
+          >
+            Edit Profile
+          </button>
+          <button 
+            className="secondary-button"
+            onClick={handleLogout}
+          >
+            Logout
+          </button>
+        </div>
       </div>
+
       <div className="dashboard-content">
-        <h3>Your Applications</h3>
-        {/* Add application tracking functionality here */}
+        <h2>Your Applications</h2>
+        {/* Applications list here */}
       </div>
+
+      {showProfileForm && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h2>Edit Profile</h2>
+              <button 
+                onClick={() => setShowProfileForm(false)}
+                className="close-button"
+              >
+                ×
+              </button>
+            </div>
+            
+            <form onSubmit={handleProfileSubmit} className="profile-form">
+              <div className="form-group">
+                <label>Full Name</label>
+                <input
+                  type="text"
+                  value={profile.full_name}
+                  onChange={(e) => setProfile(prev => ({
+                    ...prev,
+                    full_name: e.target.value
+                  }))}
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label>University</label>
+                <input
+                  type="text"
+                  value={profile.university}
+                  onChange={(e) => setProfile(prev => ({
+                    ...prev,
+                    university: e.target.value
+                  }))}
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Expected Graduation</label>
+                <input
+                  type="month"
+                  value={profile.graduation}
+                  onChange={(e) => setProfile(prev => ({
+                    ...prev,
+                    graduation: e.target.value
+                  }))}
+                  required
+                />
+              </div>
+
+              <div className="form-buttons">
+                <button 
+                  type="button" 
+                  className="secondary-button"
+                  onClick={() => setShowProfileForm(false)}
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="submit" 
+                  className="primary-button"
+                >
+                  Save Changes
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
