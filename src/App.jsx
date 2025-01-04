@@ -7,6 +7,7 @@ import './App.css'
 import UserSignUp from './components/UserSignUp';
 import Welcome from './components/Welcome';
 import ProfileSetup from './components/ProfileSetup';
+import EmployerDashboard from './components/EmployerDashboard';
 
 function App() {
   const [formData, setFormData] = useState({
@@ -303,6 +304,7 @@ function App() {
           <Route path="/signup" element={<UserSignUp />} />
           <Route path="/welcome" element={<Welcome />} />
           <Route path="/setup-profile" element={<ProfileSetup />} />
+          <Route path ="/employer/dashboard" element = {<EmployerDashboard/>} />
         </Routes>
 
         {/* Footer */}

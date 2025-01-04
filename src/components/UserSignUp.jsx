@@ -17,11 +17,11 @@ const UserSignUp = () => {
     setError("");
     setSuccess("");
 
+
     if (password !== confirmPassword) {
       setError("Passwords do not match");
       return;
     }
-
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       setSuccess(`User signed up: ${userCredential.user.email} as ${role}`);

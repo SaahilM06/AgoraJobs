@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { fetchCompanyProfile } from '../utils/companyData';
-import { appendJob } from '../utils/jobsData';
+
 
 function EmployerDashboard() {
   const navigate = useNavigate();
