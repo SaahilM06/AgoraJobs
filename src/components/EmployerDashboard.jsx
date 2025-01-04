@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { db } from "../firebaseConfig";
+
 
 function EmployerDashboard() {
   const navigate = useNavigate();
@@ -51,11 +54,34 @@ function EmployerDashboard() {
     loadDashboard();
   }, [navigate]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle job submission logic here
-    console.log(jobForm);
-    setShowForm(false);
+  
+    try {
+      
+      await addDoc(collection(db, "agorajobs-postingdetails"), {
+        ...jobForm,
+        posting_date: serverTimestamp(), // default vals
+        closing_date: jobForm.closing_date || null,
+        remote_option: jobForm.remote_option || "No",
+        experience_level: jobForm.experience_level || "Entry-level",
+      });
+  
+      console.log("Job posted successfully!");
+      setShowForm(false);
+      setJobForm({
+        company_id: "",
+        company_name: "",
+        job_description: "",
+        salary_range: "",
+        location: "",
+        skills_required: "",
+        industry: "",
+      }); // Reset the form
+    } catch (error) {
+      console.error("Error posting job:", error);
+      alert("Failed to post job. Please try again.");
+    }
   };
 
   if (loading) {
