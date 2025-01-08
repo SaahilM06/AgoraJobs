@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom"; 
-import { auth } from "../firebaseConfig";
-
+import { auth, db } from "../firebaseConfig";
 import { createUserWithEmailAndPassword } from "firebase/auth";
+import { doc, setDoc } from "firebase/firestore";
 
 const UserSignUp = () => {
   const [email, setEmail] = useState("");
@@ -13,36 +13,74 @@ const UserSignUp = () => {
   const [success, setSuccess] = useState("");
   const navigate = useNavigate();
 
+  const generateRandomId = (prefix) => {
+    const randomString = Math.random().toString(36).substring(2, 8);
+    return `${prefix}_${randomString}`;
+  };
+
   const handleSignUp = async (e) => {
     e.preventDefault();
     setError("");
     setSuccess("");
 
-
     if (password !== confirmPassword) {
       setError("Passwords do not match");
       return;
     }
+
     try {
+      // 1. Create authentication user
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      setSuccess(`User signed up: ${userCredential.user.email} as ${role}`);
+      const user = userCredential.user;
 
+      // 2. Create user document in Firestore with role-specific structure
+      let userData;
+      
+      if (role === "employer") {
+        userData = {
+          email: email,
+          role: role,
+          company_id: generateRandomId('CMP'),
+          company_name: "",
+          industry: "",
+          description: "",
+          headquarters: "",
+          website: "",
+          createdAt: new Date().toISOString()
+        };
+      } else {
+        userData = {
+          email: email,
+          role: role,
+          user_id: generateRandomId('USR'),
+          full_name: "",
+          university: "",
+          graduation: "",
+          createdAt: new Date().toISOString()
+        };
+      }
+
+      await setDoc(doc(db, "User-Details", user.uid), userData);
+
+      setSuccess(`User signed up: ${email} as ${role}`);
+
+      // 3. Set localStorage items
       localStorage.setItem("userLoggedIn", "true");
-      localStorage.setItem("employerId", "true")
-      localStorage.setItem("userId", userCredential.user.uid);
-      localStorage.setItem("userFullName", email.split("@")[0]); 
+      localStorage.setItem("userId", user.uid);
       localStorage.setItem("userRole", role);
-
-      if (role === "employee") {
-        navigate("/dashboard");
-      } else if (role === "employer") {
+      
+      // 4. Set employerId only if role is employer
+      if (role === "employer") {
+        localStorage.setItem("employerId", user.uid);
         navigate("/employer/dashboard");
+      } else {
+        navigate("/dashboard");
       }
     } catch (err) {
+      console.error("Signup error:", err);
       setError(err.message);
     }
   };
-
 
   return (
     <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh", backgroundColor: "#f8f9fc" }}>
@@ -132,7 +170,5 @@ const UserSignUp = () => {
     </div>
   );
 };
-
-
 
 export default UserSignUp;

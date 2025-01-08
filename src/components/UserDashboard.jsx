@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { doc, setDoc, updateDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import { db } from "../firebaseConfig";
 
 function UserDashboard() {
@@ -13,6 +13,35 @@ function UserDashboard() {
     role: "student",
   });
 
+  // Fetch user profile data when form opens
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      if (showProfileForm) {
+        const userId = localStorage.getItem('userId');
+        if (!userId) return;
+
+        try {
+          const userDocRef = doc(db, "User-Details", userId);
+          const userDoc = await getDoc(userDocRef);
+          
+          if (userDoc.exists()) {
+            const data = userDoc.data();
+            setProfile({
+              full_name: data.full_name || "",
+              university: data.university || "",
+              graduation: data.graduation || "",
+              role: data.role || "student"
+            });
+          }
+        } catch (error) {
+          console.error("Error fetching user profile:", error);
+        }
+      }
+    };
+
+    fetchUserProfile();
+  }, [showProfileForm]); // Re-run when form opens
+
   const handleLogout = () => {
     localStorage.removeItem("userLoggedIn");
     localStorage.removeItem("userId");
@@ -21,22 +50,23 @@ function UserDashboard() {
 
   const handleProfileSubmit = async (e) => {
     e.preventDefault();
-
     const userId = localStorage.getItem("userId");
-    if (!userId) {
-      console.error("No user ID found in localStorage");
+    const userEmail = localStorage.getItem("userEmail");
+
+    if (!userId || !userEmail) {
+      console.error("No user ID or email found in localStorage");
       return;
     }
 
     try {
+      // Get reference to the user's document using their ID
       const userDocRef = doc(db, "User-Details", userId);
 
-      // Update Firestore with new profile data
+      // Update only the profile fields
       await updateDoc(userDocRef, {
         full_name: profile.full_name,
         university: profile.university,
-        graduation: profile.graduation,
-        role: profile.role,
+        graduation: profile.graduation
       });
 
       console.log("Profile updated successfully!");

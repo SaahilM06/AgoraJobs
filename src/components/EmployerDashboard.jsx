@@ -1,15 +1,19 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { collection, addDoc, doc, updateDoc, serverTimestamp, getDoc } from "firebase/firestore";
 import { db } from "../firebaseConfig";
-
 
 function EmployerDashboard() {
   const navigate = useNavigate();
   const [showForm, setShowForm] = useState(false);
-  const [companyProfile, setCompanyProfile] = useState(null);
-  const [postedJobs, setPostedJobs] = useState([]);
+  const [showProfileForm, setShowProfileForm] = useState(false);
+  const [companyProfile, setCompanyProfile] = useState({
+    company_name: "",
+    industry: "",
+    description: "",
+    headquarters: "",
+    website: ""
+  });
   const [loading, setLoading] = useState(true);
   const [jobForm, setJobForm] = useState({
     company_id: '',
@@ -21,71 +25,37 @@ function EmployerDashboard() {
     industry: ''
   });
 
+  // Fetch company profile data when form opens
   useEffect(() => {
-    const loadDashboard = async () => {
-      const employerId = localStorage.getItem('employerId');
-      if (!employerId) {
-        navigate('/employer');
-        return;
-      }
+    const fetchCompanyProfile = async () => {
+      if (showProfileForm) {
+        const userId = localStorage.getItem('userId');
+        if (!userId) return;
 
-      try {
-        const profile = await fetchCompanyProfile(employerId);
-        setCompanyProfile(profile);
-        // In a real app, you'd also fetch posted jobs here
-        setPostedJobs([
-          // Placeholder data
-          {
-            id: 1,
-            title: "Software Engineering Intern",
-            applicants: 12,
-            status: "Active",
-            posted: "2024-03-01"
-          },
-          // Add more placeholder jobs as needed
-        ]);
-      } catch (error) {
-        console.error('Error loading dashboard:', error);
-      } finally {
-        setLoading(false);
+        try {
+          const userDocRef = doc(db, "User-Details", userId);
+          const userDoc = await getDoc(userDocRef);
+          
+          if (userDoc.exists()) {
+            const data = userDoc.data();
+            setCompanyProfile({
+              company_name: data.company_name || "",
+              industry: data.industry || "",
+              description: data.description || "",
+              headquarters: data.headquarters || "",
+              website: data.website || ""
+            });
+          }
+        } catch (error) {
+          console.error("Error fetching company profile:", error);
+        }
       }
     };
 
-    loadDashboard();
-  }, [navigate]);
+    fetchCompanyProfile();
+  }, [showProfileForm]); // Re-run when form opens
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-  
-    try {
-      
-      await addDoc(collection(db, "agorajobs-postingdetails"), {
-        ...jobForm,
-        posting_date: serverTimestamp(), // default vals
-        closing_date: jobForm.closing_date || null,
-        remote_option: jobForm.remote_option || "No",
-        experience_level: jobForm.experience_level || "Entry-level",
-      });
-  
-      console.log("Job posted successfully!");
-      setShowForm(false);
-      setJobForm({
-        company_id: "",
-        company_name: "",
-        job_description: "",
-        salary_range: "",
-        location: "",
-        skills_required: "",
-        industry: "",
-      }); // Reset the form
-    } catch (error) {
-      console.error("Error posting job:", error);
-      alert("Failed to post job. Please try again.");
-    }
-  };
-
-  const handleSignOut = () => {
-    // Clear all relevant localStorage items
+  const handleLogout = () => {
     localStorage.removeItem('employerId');
     localStorage.removeItem('userLoggedIn');
     localStorage.removeItem('userRole');
@@ -93,161 +63,163 @@ function EmployerDashboard() {
     navigate('/login');
   };
 
-  if (loading) {
-    return <div className="dashboard-loading">Loading...</div>;
-  }
+  const handleProfileSubmit = async (e) => {
+    e.preventDefault();
+    const userId = localStorage.getItem('userId');
+
+    try {
+      const userDocRef = doc(db, "User-Details", userId);
+      await updateDoc(userDocRef, {
+        company_name: companyProfile.company_name,
+        industry: companyProfile.industry,
+        description: companyProfile.description,
+        headquarters: companyProfile.headquarters,
+        website: companyProfile.website
+      });
+
+      console.log("Company profile updated successfully!");
+      setShowProfileForm(false);
+    } catch (error) {
+      console.error("Error updating company profile:", error.message);
+    }
+  };
 
   return (
-    <div className="employer-dashboard">
+    <div className="dashboard-container">
       <div className="dashboard-header">
-        <h1>Employer Dashboard</h1>
+        <h1>Welcome, {companyProfile.company_name || "Company"}</h1>
         <div className="dashboard-actions">
-          <button onClick={() => setShowForm(true)} className="primary-button">
+          <button
+            className="primary-button"
+            onClick={() => setShowForm(true)}
+          >
             Post New Job
           </button>
-          <button onClick={handleSignOut} className="secondary-button">
+          <button
+            className="secondary-button"
+            onClick={() => setShowProfileForm(true)}
+          >
+            Edit Profile
+          </button>
+          <button className="secondary-button" onClick={handleLogout}>
             Sign Out
           </button>
         </div>
       </div>
 
-      <div className="dashboard-grid">
-        {/* Company Profile Summary */}
-        <div className="dashboard-section company-summary">
-          <h2>Company Profile</h2>
-          <div className="profile-preview">
-            <img 
-              src={companyProfile?.logo_url || '/default-company-logo.png'} 
-              alt="Company logo"
-              className="company-logo"
-            />
-            <div className="profile-info">
-              <h3>{companyProfile?.company_name}</h3>
-              <p>{companyProfile?.industry}</p>
-              <p>{companyProfile?.location}</p>
-            </div>
-          </div>
-          <button onClick={() => navigate('/employer/profile')} className="edit-profile-button">
-            Edit Profile
-          </button>
-        </div>
-
-        {/* Job Postings Overview */}
-        <div className="dashboard-section job-postings">
-          <h2>Active Job Postings</h2>
-          <div className="jobs-list">
-            {postedJobs.map(job => (
-              <div key={job.id} className="job-item">
-                <div className="job-info">
-                  <h3>{job.title}</h3>
-                  <div className="job-meta">
-                    <span>Posted: {new Date(job.posted).toLocaleDateString()}</span>
-                    <span>Applicants: {job.applicants}</span>
-                    <span className={`status ${job.status.toLowerCase()}`}>
-                      {job.status}
-                    </span>
-                  </div>
-                </div>
-                <div className="job-actions">
-                  <button className="view-applicants">View Applicants</button>
-                  <button className="edit-job">Edit</button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+      <div className="dashboard-content">
+        <h2>Active Job Postings</h2>
+        {/* Job postings list here */}
       </div>
 
-      {/* Modal Form */}
-      {showForm && (
+      {showProfileForm && (
         <div className="modal-overlay">
           <div className="modal-content">
             <div className="modal-header">
-              <h2>Post New Job</h2>
-              <button 
-                onClick={() => setShowForm(false)} 
+              <h2>Edit Company Profile</h2>
+              <button
+                onClick={() => setShowProfileForm(false)}
                 className="close-button"
               >
                 ×
               </button>
             </div>
-            
-            <form onSubmit={handleSubmit} className="job-form">
-              <div className="form-grid">
-                <div className="form-group">
-                  <label>Job Title</label>
-                  <input
-                    type="text"
-                    value={jobForm.title}
-                    onChange={(e) => setJobForm(prev => ({...prev, title: e.target.value}))}
-                    required
-                  />
-                </div>
 
-                <div className="form-group">
-                  <label>Job Description</label>
-                  <textarea
-                    value={jobForm.job_description}
-                    onChange={(e) => setJobForm(prev => ({...prev, job_description: e.target.value}))}
-                    required
-                  />
-                </div>
+            <form onSubmit={handleProfileSubmit} className="profile-form">
+              <div className="form-group">
+                <label>Company Name</label>
+                <input
+                  type="text"
+                  value={companyProfile.company_name}
+                  onChange={(e) =>
+                    setCompanyProfile((prev) => ({
+                      ...prev,
+                      company_name: e.target.value,
+                    }))
+                  }
+                  required
+                />
+              </div>
 
-                <div className="form-group">
-                  <label>Salary Range</label>
-                  <input
-                    type="text"
-                    value={jobForm.salary_range}
-                    onChange={(e) => setJobForm(prev => ({...prev, salary_range: e.target.value}))}
-                    placeholder="e.g. $20-$25/hr"
-                    required
-                  />
-                </div>
+              <div className="form-group">
+                <label>Industry</label>
+                <input
+                  type="text"
+                  value={companyProfile.industry}
+                  onChange={(e) =>
+                    setCompanyProfile((prev) => ({
+                      ...prev,
+                      industry: e.target.value,
+                    }))
+                  }
+                  required
+                />
+              </div>
 
-                <div className="form-group">
-                  <label>Location</label>
-                  <input
-                    type="text"
-                    value={jobForm.location}
-                    onChange={(e) => setJobForm(prev => ({...prev, location: e.target.value}))}
-                    required
-                  />
-                </div>
+              <div className="form-group">
+                <label>Company Description</label>
+                <textarea
+                  value={companyProfile.description}
+                  onChange={(e) =>
+                    setCompanyProfile((prev) => ({
+                      ...prev,
+                      description: e.target.value,
+                    }))
+                  }
+                  required
+                  rows={4}
+                />
+              </div>
 
-                <div className="form-group">
-                  <label>Skills Required</label>
-                  <input
-                    type="text"
-                    value={jobForm.skills_required}
-                    onChange={(e) => setJobForm(prev => ({...prev, skills_required: e.target.value}))}
-                    placeholder="e.g. Python, Machine Learning"
-                    required
-                  />
-                </div>
+              <div className="form-group">
+                <label>Headquarters</label>
+                <input
+                  type="text"
+                  value={companyProfile.headquarters}
+                  onChange={(e) =>
+                    setCompanyProfile((prev) => ({
+                      ...prev,
+                      headquarters: e.target.value,
+                    }))
+                  }
+                  required
+                />
+              </div>
 
-                <div className="form-group">
-                  <label>Industry</label>
-                  <input
-                    type="text"
-                    value={jobForm.industry}
-                    onChange={(e) => setJobForm(prev => ({...prev, industry: e.target.value}))}
-                    required
-                  />
-                </div>
+              <div className="form-group">
+                <label>Website</label>
+                <input
+                  type="url"
+                  value={companyProfile.website}
+                  onChange={(e) =>
+                    setCompanyProfile((prev) => ({
+                      ...prev,
+                      website: e.target.value,
+                    }))
+                  }
+                  placeholder="https://example.com"
+                  required
+                />
               </div>
 
               <div className="form-buttons">
-                <button type="button" onClick={() => setShowForm(false)} className="secondary-button">
+                <button
+                  type="button"
+                  className="secondary-button"
+                  onClick={() => setShowProfileForm(false)}
+                >
                   Cancel
                 </button>
                 <button type="submit" className="primary-button">
-                  Post Job
+                  Save Changes
                 </button>
               </div>
             </form>
           </div>
         </div>
       )}
+
+      {/* Job posting form modal here */}
     </div>
   );
 }
