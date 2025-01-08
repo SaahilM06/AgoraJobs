@@ -2040,6 +2040,7 @@ section {
 .dashboard-actions {
   display: flex;
   gap: 1rem;
+  align-items: center;
 }
 
 .dashboard-content {
@@ -2061,4 +2062,19 @@ section {
   justify-content: flex-end;
   gap: 1rem;
   margin-top: 1rem;
+}
+
+.secondary-button {
+  padding: 0.75rem 1.5rem;
+  background-color: #f8f9fa;
+  color: #333;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+
+.secondary-button:hover {
+  background-color: #e9ecef;
 }

@@ -84,6 +84,15 @@ function EmployerDashboard() {
     }
   };
 
+  const handleSignOut = () => {
+    // Clear all relevant localStorage items
+    localStorage.removeItem('employerId');
+    localStorage.removeItem('userLoggedIn');
+    localStorage.removeItem('userRole');
+    localStorage.removeItem('userId');
+    navigate('/login');
+  };
+
   if (loading) {
     return <div className="dashboard-loading">Loading...</div>;
   }
@@ -92,9 +101,14 @@ function EmployerDashboard() {
     <div className="employer-dashboard">
       <div className="dashboard-header">
         <h1>Employer Dashboard</h1>
-        <button onClick={() => setShowForm(true)} className="primary-button">
-          Post New Job
-        </button>
+        <div className="dashboard-actions">
+          <button onClick={() => setShowForm(true)} className="primary-button">
+            Post New Job
+          </button>
+          <button onClick={handleSignOut} className="secondary-button">
+            Sign Out
+          </button>
+        </div>
       </div>
 
       <div className="dashboard-grid">
