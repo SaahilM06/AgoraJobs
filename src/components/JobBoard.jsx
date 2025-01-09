@@ -154,14 +154,9 @@ function JobBoard() {
             {selectedJob ? (
               <>
                 <div className="job-header">
-                  <img 
-                    src={selectedJob.logo} 
-                    alt={`${selectedJob.company} logo`}
-                    onError={(e) => { e.target.src = DEFAULT_LOGO }}
-                  />
                   <div className="job-header-content">
                     <h2>{selectedJob.title}</h2>
-                    <h3>{selectedJob.company}</h3>
+                    <h3>{selectedJob.company_name}</h3>
                     <div className="job-header-info">
                       <span>{selectedJob.salary_range}</span>
                       <span>{selectedJob.location}</span>
@@ -182,24 +177,26 @@ function JobBoard() {
                       <span>{new Date(selectedJob.posting_date).toLocaleDateString()}</span>
                     </div>
                     <div className="meta-item">
-                      <span className="label">Closing Date</span>
-                      <span>{new Date(selectedJob.closing_date).toLocaleDateString()}</span>
-                    </div>
-                    <div className="meta-item">
-                      <span className="label">Job Type</span>
-                      <span>{selectedJob.job_type}</span>
-                    </div>
-                    <div className="meta-item">
-                      <span className="label">Remote Option</span>
-                      <span>{selectedJob.remote_option}</span>
-                    </div>
-                    <div className="meta-item">
                       <span className="label">Experience Level</span>
                       <span>{selectedJob.experience_level}</span>
                     </div>
                     <div className="meta-item">
+                      <span className="label">Location</span>
+                      <span>{selectedJob.location}</span>
+                    </div>
+                    <div className="meta-item">
                       <span className="label">Industry</span>
                       <span>{selectedJob.industry}</span>
+                    </div>
+                    <div className="meta-item">
+                      <span className="label">Headquarters</span>
+                      <span>{selectedJob.headquarters}</span>
+                    </div>
+                    <div className="meta-item">
+                      <span className="label">Website</span>
+                      <a href={selectedJob.website} target="_blank" rel="noopener noreferrer">
+                        {selectedJob.website}
+                      </a>
                     </div>
                   </div>
 
@@ -211,36 +208,18 @@ function JobBoard() {
                       ))}
                     </div>
                   </div>
-                </div>
 
-                <div className="job-tabs">
-                  <button className="tab active">About the Position</button>
-                  <button className="tab">About the Company</button>
-                </div>
-                
-                <div className="job-description">
-                  <section>
-                    <h3>The Opportunity</h3>
-                    <p>{selectedJob.fullDescription.opportunity}</p>
-                  </section>
-                  
-                  <section>
-                    <h3>What You'll Do</h3>
-                    <ul>
-                      {selectedJob.fullDescription.responsibilities.map((resp, i) => (
-                        <li key={i}>{resp}</li>
-                      ))}
-                    </ul>
-                  </section>
-                  
-                  <section>
-                    <h3>Qualifications</h3>
-                    <ul>
-                      {selectedJob.fullDescription.qualifications.map((qual, i) => (
-                        <li key={i}>{qual}</li>
-                      ))}
-                    </ul>
-                  </section>
+                  <div className="job-description">
+                    <section>
+                      <h3>Job Description</h3>
+                      <p>{selectedJob.job_description}</p>
+                    </section>
+                    
+                    <section>
+                      <h3>About the Company</h3>
+                      <p>{selectedJob.company_description}</p>
+                    </section>
+                  </div>
                 </div>
               </>
             ) : (

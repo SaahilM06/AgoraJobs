@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom';
 import JobBoard from './components/JobBoard';
 import UserPortal from './components/UserPortal';
 import UserDashboard from './components/UserDashboard';
@@ -8,6 +8,34 @@ import UserSignUp from './components/UserSignUp';
 import Welcome from './components/Welcome';
 import ProfileSetup from './components/ProfileSetup';
 import EmployerDashboard from './components/EmployerDashboard';
+
+const ProtectedEmployeeRoute = ({ children }) => {
+  const userRole = localStorage.getItem('userRole');
+  
+  if (!localStorage.getItem('userLoggedIn')) {
+    return <Navigate to="/login" />;
+  }
+  
+  if (userRole !== 'employee') {
+    return <Navigate to="/employer/dashboard" />;
+  }
+  
+  return children;
+};
+
+const ProtectedEmployerRoute = ({ children }) => {
+  const userRole = localStorage.getItem('userRole');
+  
+  if (!localStorage.getItem('userLoggedIn')) {
+    return <Navigate to="/login" />;
+  }
+  
+  if (userRole !== 'employer') {
+    return <Navigate to="/dashboard" />;
+  }
+  
+  return children;
+};
 
 function App() {
   const [formData, setFormData] = useState({
@@ -154,6 +182,13 @@ function App() {
     );
   };
 
+  const DashboardLink = () => {
+    const userRole = localStorage.getItem('userRole');
+    const dashboardPath = userRole === 'employer' ? '/employer/dashboard' : '/dashboard';
+    
+    return <Link to={dashboardPath}>Dashboard</Link>;
+  };
+
   return (
     <Router>
       <div className="app">
@@ -164,7 +199,7 @@ function App() {
             <Link to="/jobs">Jobs</Link>
             <a href="#contact">Contact</a>
             {localStorage.getItem('userLoggedIn') ? (
-              <Link to="/dashboard">Dashboard</Link>
+              <DashboardLink />
             ) : (
               <Link to="/login">Login</Link>
             )}
@@ -304,11 +339,25 @@ function App() {
           } />
           <Route path="/jobs" element={<JobBoard />} />
           <Route path="/login" element={<UserPortal />} />
-          <Route path="/dashboard" element={<UserDashboard />} />
+          <Route 
+            path="/dashboard" 
+            element={
+              <ProtectedEmployeeRoute>
+                <UserDashboard />
+              </ProtectedEmployeeRoute>
+            } 
+          />
           <Route path="/signup" element={<UserSignUp />} />
           <Route path="/welcome" element={<Welcome />} />
           <Route path="/setup-profile" element={<ProfileSetup />} />
-          <Route path ="/employer/dashboard" element = {<EmployerDashboard/>} />
+          <Route 
+            path="/employer/dashboard" 
+            element={
+              <ProtectedEmployerRoute>
+                <EmployerDashboard />
+              </ProtectedEmployerRoute>
+            } 
+          />
         </Routes>
 
         {/* Footer */}

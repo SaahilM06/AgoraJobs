@@ -1,4 +1,4 @@
-import { getFirestore, collection, getDocs, addDoc } from 'firebase/firestore';
+import { getFirestore, collection, getDocs, addDoc, query, where } from 'firebase/firestore';
 import app from '../firebaseConfig';
 
 const db = getFirestore(app);
@@ -8,47 +8,51 @@ export async function fetchJobs() {
     const jobsCollection = collection(db, 'agorajobs-postingdetails');
     const querySnapshot = await getDocs(jobsCollection);
     
-    const jobs = querySnapshot.docs.map(doc => {
+    const jobs = await Promise.all(querySnapshot.docs.map(async doc => {
       const data = doc.data();
+      console.log('Job posting data:', data); // Debug log
+      
+      // Fetch company details from User-Details collection
+      const userDetailsRef = collection(db, 'User-Details');
+      const userQuery = query(userDetailsRef, where('company_id', '==', data.company_id));
+      console.log('Searching for company_id:', data.company_id); // Debug log
+      
+      const userSnapshot = await getDocs(userQuery);
+      console.log('User query results:', userSnapshot.docs.map(d => d.data())); // Debug log
+      
+      let companyDetails = {};
+      if (!userSnapshot.empty) {
+        const companyData = userSnapshot.docs[0].data();
+        console.log('Found company data:', companyData); // Debug log
+        companyDetails = {
+          company_description: companyData.description || '',
+          headquarters: companyData.headquarters || '',
+          industry: companyData.industry || '',
+          website: companyData.website || '',
+          company_name: companyData.company_name || ''
+        };
+      } else {
+        console.log('No company found for company_id:', data.company_id); // Debug log
+      }
+
       return {
         id: doc.id,
-        title: data.job_description?.split('.')[0] || 'No Title', // Use first sentence as title
-        company: data.company_name,
-        description: data.job_description,
-        posting_date: data.posting_date,
-        closing_date: data.closing_date,
-        job_type: data.job_type,
-        salary_range: data.salary_range,
-        location: data.location,
-        remote_option: data.remote_option,
+        title: data.title,
         experience_level: data.experience_level,
-        skills_required: Array.isArray(data.skills_required) 
-          ? data.skills_required 
-          : data.skills_required?.split(',').map(skill => skill.trim()) || [],
-        industry: data.industry,
-        company_id: data.company_id,
-        logo: `/company-logos/${data.company_id}.png`,
-        fullDescription: {
-          opportunity: data.job_description,
-          responsibilities: [
-            "Review and understand project requirements",
-            "Collaborate with team members",
-            "Contribute to project deliverables",
-            "Participate in team meetings"
-          ],
-          qualifications: [
-            "Currently enrolled in related degree program",
-            "Strong analytical and problem-solving skills",
-            "Excellent communication skills",
-            "Ability to work independently and in a team"
-          ]
-        }
+        job_description: data.job_description,
+        location: data.location,
+        posting_date: data.posting_date,
+        salary_range: data.salary_range,
+        skills_required: typeof data.skills_required === 'string' 
+          ? data.skills_required.split(',').map(skill => skill.trim())
+          : data.skills_required || [],
+        ...companyDetails
       };
-    });
-
+    }));
+    
     return jobs;
   } catch (error) {
-    console.error('Error fetching jobs from Firestore:', error);
+    console.error('Error fetching jobs:', error);
     return [];
   }
 }
