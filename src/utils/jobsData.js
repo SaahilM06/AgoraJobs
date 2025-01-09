@@ -37,6 +37,7 @@ export async function fetchJobs() {
 
       return {
         id: doc.id,
+        job_id: data.job_id,
         title: data.title,
         experience_level: data.experience_level,
         job_description: data.job_description,

@@ -1,5 +1,8 @@
 import { useState, useEffect } from 'react';
 import { fetchJobs } from '../utils/jobsData';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { collection, addDoc, doc, getDoc } from 'firebase/firestore';
+import { storage, db, auth } from '../firebaseConfig';
 
 const DEFAULT_LOGO = 'https://via.placeholder.com/80?text=Logo';
 
@@ -45,12 +48,69 @@ function JobBoard() {
     }
   };
 
-  const handleApplySubmit = (e) => {
+  const handleApplySubmit = async (e) => {
     e.preventDefault();
-    // Handle the application submission here
-    console.log('Applying with resume:', resumeFile);
-    setShowApplyPopup(false);
-    setResumeFile(null);
+    console.log("Starting application submission process...");
+    
+    const currentUser = auth.currentUser;
+    if (!currentUser) {
+      console.error("No authenticated user found");
+      alert("Please sign in to submit an application");
+      return;
+    }
+
+    try {
+      // First get the user_id from User-Details
+      const userDocRef = doc(db, "User-Details", currentUser.uid);
+      const userDoc = await getDoc(userDocRef);
+      
+      if (!userDoc.exists()) {
+        throw new Error("User details not found");
+      }
+
+      const userData = userDoc.data();
+      const user_id = userData.user_id; // This will be in format "USR_xxx"
+
+      if (!user_id || !resumeFile || !selectedJob) {
+        console.error("Missing required information:", {
+          hasUserId: !!user_id,
+          hasResumeFile: !!resumeFile,
+          hasSelectedJob: !!selectedJob,
+          hasJobId: !!selectedJob?.job_id
+        });
+        alert("Please ensure you're logged in and have attached a resume.");
+        return;
+      }
+
+      const resume_id = `RESUME_${user_id}_${Date.now()}`;
+      console.log("Generated temporary resume_id:", resume_id);
+
+      const applicationData = {
+        application_date: new Date().toISOString(),
+        job_id: selectedJob.job_id,
+        user_id: user_id,
+        resume_id: resume_id
+      };
+      
+      console.log("Preparing to submit application with data:", applicationData);
+
+      const applicationsRef = collection(db, "applications-submitted");
+      const docRef = await addDoc(applicationsRef, applicationData);
+      console.log("Application submitted successfully with ID:", docRef.id);
+
+      setShowApplyPopup(false);
+      setResumeFile(null);
+      alert("Application submitted successfully!");
+
+    } catch (error) {
+      console.error("Error in application submission:", error);
+      console.error("Error details:", {
+        code: error.code,
+        message: error.message,
+        stack: error.stack
+      });
+      alert(`Error submitting application: ${error.message}`);
+    }
   };
 
   const filteredJobs = jobs.filter(job => {

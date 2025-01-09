@@ -34,6 +34,7 @@ function EmployerDashboard() {
     skills_required: '',
     experience_level: ''
   });
+  const [jobApplicants, setJobApplicants] = useState([]);
 
   // Fetch company profile data when form opens
   useEffect(() => {
@@ -220,6 +221,46 @@ function EmployerDashboard() {
     }
   };
 
+  const fetchJobApplicants = async (jobId) => {
+    try {
+      const applicationsRef = collection(db, "applications-submitted");
+      const q = query(applicationsRef, where("job_id", "==", jobId));
+      const querySnapshot = await getDocs(q);
+      
+      const applicantsPromises = querySnapshot.docs.map(async (applicationDoc) => {
+        const applicationData = applicationDoc.data();
+        
+        // Get applicant details from User-Details by querying for user_id
+        const userDetailsRef = collection(db, "User-Details");
+        const userQuery = query(userDetailsRef, where("user_id", "==", applicationData.user_id));
+        const userSnapshot = await getDocs(userQuery);
+        
+        let userData = {};
+        if (!userSnapshot.empty) {
+          userData = userSnapshot.docs[0].data();
+        }
+
+        return {
+          id: applicationDoc.id,
+          ...applicationData,
+          applicant_name: userData.full_name || "Unknown",
+          university: userData.university || "Not specified",
+          graduation: userData.graduation || "Not specified"
+        };
+      });
+
+      const resolvedApplicants = await Promise.all(applicantsPromises);
+      setJobApplicants(resolvedApplicants);
+    } catch (error) {
+      console.error("Error fetching applicants:", error);
+    }
+  };
+
+  const handleJobSelect = async (job) => {
+    setSelectedJob(job);
+    await fetchJobApplicants(job.job_id);
+  };
+
   return (
     <div className="dashboard-container">
       <div className="dashboard-header">
@@ -251,7 +292,7 @@ function EmployerDashboard() {
               <div 
                 key={job.id}
                 className={`job-card ${selectedJob?.id === job.id ? 'selected' : ''}`}
-                onClick={() => setSelectedJob(job)}
+                onClick={() => handleJobSelect(job)}
               >
                 <h3>{job.title}</h3>
                 <div className="job-card-details">
@@ -265,19 +306,13 @@ function EmployerDashboard() {
 
           {selectedJob && (
             <div className="job-details-panel">
-              <div className="job-details-header">
-                <h3>{selectedJob.title}</h3>
-                <div className="header-actions">
-                  <button 
-                    className="edit-button"
-                    onClick={() => handleEditClick(selectedJob)}
-                  >
+              <div className="job-header">
+                <h2>{selectedJob.title}</h2>
+                <div className="job-actions">
+                  <button onClick={() => handleEditClick(selectedJob)} className="edit-button">
                     Edit
                   </button>
-                  <button 
-                    className="close-button"
-                    onClick={() => setSelectedJob(null)}
-                  >
+                  <button onClick={() => setSelectedJob(null)} className="close-button">
                     ×
                   </button>
                 </div>
@@ -381,41 +416,65 @@ function EmployerDashboard() {
                   </div>
                 </form>
               ) : (
-                <div className="job-details-content">
-                  <div className="detail-item">
-                    <label>Experience Level</label>
-                    <p>{selectedJob.experience_level}</p>
-                  </div>
-                  
-                  <div className="detail-item">
-                    <label>Location</label>
-                    <p>{selectedJob.location}</p>
-                  </div>
-                  
-                  <div className="detail-item">
-                    <label>Salary Range</label>
-                    <p>{selectedJob.salary_range}</p>
-                  </div>
-                  
-                  <div className="detail-item">
-                    <label>Posted On</label>
-                    <p>{new Date(selectedJob.posting_date).toLocaleDateString()}</p>
-                  </div>
-                  
-                  <div className="detail-item">
-                    <label>Required Skills</label>
-                    <div className="skills-list">
-                      {selectedJob.skills_required.split(',').map((skill, index) => (
-                        <span key={index} className="skill-tag">
-                          {skill.trim()}
-                        </span>
-                      ))}
+                <div className="job-content">
+                  <div className="job-info">
+                    <div className="detail-item">
+                      <label>Experience Level</label>
+                      <p>{selectedJob.experience_level}</p>
                     </div>
-                  </div>
-                  
-                  <div className="detail-item">
-                    <label>Job Description</label>
-                    <p>{selectedJob.job_description}</p>
+                    <div className="detail-item">
+                      <label>Location</label>
+                      <p>{selectedJob.location}</p>
+                    </div>
+                    <div className="detail-item">
+                      <label>Salary Range</label>
+                      <p>{selectedJob.salary_range}</p>
+                    </div>
+                    <div className="detail-item">
+                      <label>Posted On</label>
+                      <p>{new Date(selectedJob.posting_date).toLocaleDateString()}</p>
+                    </div>
+                    <div className="detail-item">
+                      <label>Required Skills</label>
+                      <div className="skills-list">
+                        {selectedJob.skills_required.split(',').map((skill, index) => (
+                          <span key={index} className="skill-tag">{skill.trim()}</span>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="detail-item">
+                      <label>Job Description</label>
+                      <p>{selectedJob.job_description}</p>
+                    </div>
+
+                    <div className="detail-item applicants-section">
+                      <label>Applications ({jobApplicants.length})</label>
+                      <div className="applicants-list">
+                        {jobApplicants.length === 0 ? (
+                          <p className="no-applicants">No applications yet</p>
+                        ) : (
+                          jobApplicants.map((applicant) => (
+                            <div key={applicant.id} className="applicant-card">
+                              <div className="applicant-header">
+                                <h4>{applicant.applicant_name}</h4>
+                                <span className="application-date">
+                                  Applied: {new Date(applicant.application_date).toLocaleDateString()}
+                                </span>
+                              </div>
+                              <div className="applicant-details">
+                                <p><strong>University:</strong> {applicant.university}</p>
+                                <p><strong>Expected Graduation:</strong> {applicant.graduation}</p>
+                              </div>
+                              <div className="applicant-resume">
+                                <span className="resume-id">
+                                  Resume ID: {applicant.resume_id}
+                                </span>
+                              </div>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    </div>
                   </div>
                 </div>
               )}
