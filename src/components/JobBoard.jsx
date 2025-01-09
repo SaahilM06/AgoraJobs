@@ -113,18 +113,33 @@ function JobBoard() {
     }
   };
 
-  const filteredJobs = jobs.filter(job => {
-    const matchesSearch = job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         job.company.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         job.description.toLowerCase().includes(searchQuery.toLowerCase());
-    
-    const matchesIndustry = !filters.industry || job.industry === filters.industry;
-    const matchesLocation = !filters.location || job.location.includes(filters.location);
-    const matchesSalary = !filters.salary || job.salary_range.includes(filters.salary);
-    const matchesExperience = !filters.experience || job.experience_level === filters.experience;
+  const getUniqueValues = (array, key) => {
+    return [...new Set(array.map(item => item[key]))].filter(Boolean);
+  };
 
-    return matchesSearch && matchesIndustry && matchesLocation && 
-           matchesSalary && matchesExperience;
+  const uniqueIndustries = getUniqueValues(jobs, 'industry');
+  const uniqueLocations = getUniqueValues(jobs, 'location');
+  const uniqueExperienceLevels = getUniqueValues(jobs, 'experience_level');
+  const uniqueSalaryRanges = getUniqueValues(jobs, 'salary_range');
+
+  const filteredJobs = jobs.filter(job => {
+    const searchTerms = searchQuery.toLowerCase();
+    const matchesSearch = searchQuery === '' || 
+      (job.title?.toLowerCase() || '').includes(searchTerms) ||
+      (job.company_name?.toLowerCase() || '').includes(searchTerms) ||
+      (job.skills_required && Array.isArray(job.skills_required) && 
+        job.skills_required.some(skill => 
+          (skill?.toLowerCase() || '').includes(searchTerms)
+        )
+      ) ||
+      (job.description?.toLowerCase() || '').includes(searchTerms);
+
+    const matchesIndustry = !filters.industry || job.industry === filters.industry;
+    const matchesLocation = !filters.location || job.location === filters.location;
+    const matchesExperience = !filters.experience || job.experience_level === filters.experience;
+    const matchesSalary = !filters.salary || job.salary_range === filters.salary;
+
+    return matchesSearch && matchesIndustry && matchesLocation && matchesExperience && matchesSalary;
   });
 
   return (
@@ -145,39 +160,48 @@ function JobBoard() {
               value={filters.industry}
               onChange={(e) => handleFilterChange('industry', e.target.value)}
             >
-              <option value="">Industry</option>
-              <option value="Technology">Technology</option>
-              <option value="Finance">Finance</option>
-              <option value="Healthcare">Healthcare</option>
+              <option value="">All Industries</option>
+              {uniqueIndustries.map(industry => (
+                <option key={industry} value={industry}>
+                  {industry}
+                </option>
+              ))}
             </select>
 
             <select
               value={filters.location}
               onChange={(e) => handleFilterChange('location', e.target.value)}
             >
-              <option value="">Location</option>
-              <option value="Austin">Austin</option>
-              <option value="Remote">Remote</option>
-            </select>
-
-            <select
-              value={filters.salary}
-              onChange={(e) => handleFilterChange('salary', e.target.value)}
-            >
-              <option value="">Salary</option>
-              <option value="0-30">$0-30/hr</option>
-              <option value="30-50">$30-50/hr</option>
-              <option value="50+">$50+/hr</option>
+              <option value="">All Locations</option>
+              {uniqueLocations.map(location => (
+                <option key={location} value={location}>
+                  {location}
+                </option>
+              ))}
             </select>
 
             <select
               value={filters.experience}
               onChange={(e) => handleFilterChange('experience', e.target.value)}
             >
-              <option value="">Experience</option>
-              <option value="Entry Level">Entry Level</option>
-              <option value="Mid Level">Mid Level</option>
-              <option value="Senior">Senior</option>
+              <option value="">All Experience Levels</option>
+              {uniqueExperienceLevels.map(level => (
+                <option key={level} value={level}>
+                  {level}
+                </option>
+              ))}
+            </select>
+
+            <select
+              value={filters.salary}
+              onChange={(e) => handleFilterChange('salary', e.target.value)}
+            >
+              <option value="">All Salary Ranges</option>
+              {uniqueSalaryRanges.map(range => (
+                <option key={range} value={range}>
+                  {range}
+                </option>
+              ))}
             </select>
           </div>
         </div>

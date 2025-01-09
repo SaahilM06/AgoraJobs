@@ -35,6 +35,21 @@ function EmployerDashboard() {
     experience_level: ''
   });
   const [jobApplicants, setJobApplicants] = useState([]);
+  const [customLocation, setCustomLocation] = useState(false);
+
+  // Predefined location options
+  const locationOptions = [
+    "Remote",
+    "New York, NY",
+    "San Francisco, CA",
+    "Los Angeles, CA",
+    "Chicago, IL",
+    "Seattle, WA",
+    "Austin, TX",
+    "Boston, MA",
+    "Denver, CO",
+    "Other (specify)"
+  ];
 
   // Fetch company profile data when form opens
   useEffect(() => {
@@ -514,8 +529,7 @@ function EmployerDashboard() {
 
               <div className="form-group">
                 <label>Industry</label>
-                <input
-                  type="text"
+                <select
                   value={companyProfile.industry}
                   onChange={(e) =>
                     setCompanyProfile((prev) => ({
@@ -524,7 +538,24 @@ function EmployerDashboard() {
                     }))
                   }
                   required
-                />
+                >
+                  <option value="">Select Industry</option>
+                  <option value="Information Technology">Information Technology</option>
+                  <option value="Healthcare">Healthcare</option>
+                  <option value="Finance">Finance</option>
+                  <option value="Education">Education</option>
+                  <option value="Manufacturing">Manufacturing</option>
+                  <option value="Retail">Retail</option>
+                  <option value="Robotics">Robotics</option>
+                  <option value="Artificial Intelligence">Artificial Intelligence</option>
+                  <option value="E-commerce">E-commerce</option>
+                  <option value="Telecommunications">Telecommunications</option>
+                  <option value="Biotechnology">Biotechnology</option>
+                  <option value="Real Estate">Real Estate</option>
+                  <option value="Energy">Energy</option>
+                  <option value="Transportation">Transportation</option>
+                  <option value="Media & Entertainment">Media & Entertainment</option>
+                </select>
               </div>
 
               <div className="form-group">
@@ -631,10 +662,13 @@ function EmployerDashboard() {
                   }
                   required
                 >
-                  <option value="">Select Experience Level</option>
-                  <option value="Entry-level">Entry-level</option>
-                  <option value="Mid-level">Mid-level</option>
-                  <option value="Senior">Senior</option>
+                  <option value="">Select Years of Experience</option>
+                  <option value="0-1 years">0-1 years</option>
+                  <option value="1-2 years">1-2 years</option>
+                  <option value="2-3 years">2-3 years</option>
+                  <option value="3-4 years">3-4 years</option>
+                  <option value="4-5 years">4-5 years</option>
+                  <option value="5+ years">5+ years</option>
                 </select>
               </div>
 
@@ -654,9 +688,8 @@ function EmployerDashboard() {
               </div>
 
               <div className="form-group">
-                <label>Salary Range</label>
-                <input
-                  type="text"
+                <label>Salary Range (per hour)</label>
+                <select
                   value={jobForm.salary_range}
                   onChange={(e) =>
                     setJobForm((prev) => ({
@@ -664,24 +697,75 @@ function EmployerDashboard() {
                       salary_range: e.target.value,
                     }))
                   }
-                  placeholder="e.g. $60,000 - $80,000"
                   required
-                />
+                >
+                  <option value="">Select Salary Range</option>
+                  <option value="$11-$20/hr">$11-$20/hr</option>
+                  <option value="$21-$30/hr">$21-$30/hr</option>
+                  <option value="$31-$40/hr">$31-$40/hr</option>
+                  <option value="$41-$50/hr">$41-$50/hr</option>
+                  <option value="$51-$60/hr">$51-$60/hr</option>
+                  <option value="$61+/hr">$61+/hr</option>
+                </select>
               </div>
 
               <div className="form-group">
                 <label>Location</label>
-                <input
-                  type="text"
-                  value={jobForm.location}
-                  onChange={(e) =>
-                    setJobForm((prev) => ({
-                      ...prev,
-                      location: e.target.value,
-                    }))
-                  }
-                  required
-                />
+                {!customLocation ? (
+                  <select
+                    value={jobForm.location}
+                    onChange={(e) => {
+                      if (e.target.value === "Other (specify)") {
+                        setCustomLocation(true);
+                        setJobForm(prev => ({
+                          ...prev,
+                          location: ''
+                        }));
+                      } else {
+                        setJobForm(prev => ({
+                          ...prev,
+                          location: e.target.value
+                        }));
+                      }
+                    }}
+                    required
+                  >
+                    <option value="">Select Location</option>
+                    {locationOptions.map(location => (
+                      <option key={location} value={location}>
+                        {location}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <div className="custom-location-input">
+                    <input
+                      type="text"
+                      value={jobForm.location}
+                      onChange={(e) =>
+                        setJobForm(prev => ({
+                          ...prev,
+                          location: e.target.value
+                        }))
+                      }
+                      placeholder="Enter location"
+                      required
+                    />
+                    <button
+                      type="button"
+                      className="secondary-button"
+                      onClick={() => {
+                        setCustomLocation(false);
+                        setJobForm(prev => ({
+                          ...prev,
+                          location: ''
+                        }));
+                      }}
+                    >
+                      Back to List
+                    </button>
+                  </div>
+                )}
               </div>
 
               <div className="form-group">
