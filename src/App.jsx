@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link, Navigate, useNavigate } from 'react-router-dom';
 import JobBoard from './components/JobBoard';
 import UserPortal from './components/UserPortal';
 import UserDashboard from './components/UserDashboard';
@@ -189,6 +189,33 @@ function App() {
     return <Link to={dashboardPath}>Dashboard</Link>;
   };
 
+  const HeroSection = () => {
+    const navigate = useNavigate();
+
+    const handleGetStarted = () => {
+      if (localStorage.getItem('userLoggedIn')) {
+        const userRole = localStorage.getItem('userRole');
+        navigate(userRole === 'employer' ? '/employer/dashboard' : '/dashboard');
+      } else {
+        navigate('/login');
+      }
+    };
+
+    return (
+      <section className="hero-section">
+        <div className="hero-content">
+          <h1>Your bridge to startup opportunities.</h1>
+          <p className="hero-subtitle">Connect with innovative startups, land your dream internship or job, and kickstart your career journey.</p>
+          <button className="cta-button" onClick={handleGetStarted}>Get Started - It's Free!</button>
+          <div className="trust-badge">
+            <span>⭐️⭐️⭐️⭐️⭐️</span>
+            <p>Trusted by 1000+ students and 100+ startups</p>
+          </div>
+        </div>
+      </section>
+    );
+  };
+
   return (
     <Router>
       <div className="app">
@@ -209,19 +236,7 @@ function App() {
         <Routes>
           <Route path="/" element={
             <>
-              {/* Hero Section */}
-              <section className="hero-section">
-                <div className="hero-content">
-                  <h1>Your bridge to startup opportunities.</h1>
-                  <p className="hero-subtitle">Connect with innovative startups, land your dream internship or job, and kickstart your career journey.</p>
-                  <button className="cta-button">Get Started - It's Free!</button>
-                  <div className="trust-badge">
-                    <span>⭐️⭐️⭐️⭐️⭐️</span>
-                    <p>Trusted by 1000+ students and 100+ startups</p>
-                  </div>
-                </div>
-              </section>
-
+              <HeroSection />
               {/* Features Section */}
               <section className="features-section">
                 <h2>Why Choose AgoraJobs?</h2>
