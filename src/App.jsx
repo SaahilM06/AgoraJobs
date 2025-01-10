@@ -8,6 +8,7 @@ import UserSignUp from './components/UserSignUp';
 import Welcome from './components/Welcome';
 import ProfileSetup from './components/ProfileSetup';
 import EmployerDashboard from './components/EmployerDashboard';
+import Contact from './components/Contact';
 
 const ProtectedEmployeeRoute = ({ children }) => {
   const userRole = localStorage.getItem('userRole');
@@ -224,7 +225,7 @@ function App() {
           <nav className="headers">
             <Link to="/">Home</Link>
             <Link to="/jobs">Jobs</Link>
-            <a href="#contact">Contact</a>
+            <Link to="/contact">Contact</Link>
             {localStorage.getItem('userLoggedIn') ? (
               <DashboardLink />
             ) : (
@@ -354,6 +355,7 @@ function App() {
           } />
           <Route path="/jobs" element={<JobBoard />} />
           <Route path="/login" element={<UserPortal />} />
+          <Route path="/contact" element={<Contact />} />
           <Route 
             path="/dashboard" 
             element={
