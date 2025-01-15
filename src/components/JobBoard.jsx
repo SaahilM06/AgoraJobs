@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { fetchJobs } from '../utils/jobsData';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { collection, addDoc, doc, getDoc } from 'firebase/firestore';
+import { collection, addDoc, doc, getDoc, getDocs } from 'firebase/firestore';
 import { storage, db, auth } from '../firebaseConfig';
+import { useNavigate } from 'react-router-dom';
 
 const DEFAULT_LOGO = 'https://via.placeholder.com/80?text=Logo';
 
@@ -18,19 +19,40 @@ function JobBoard() {
   });
   const [showApplyPopup, setShowApplyPopup] = useState(false);
   const [resumeFile, setResumeFile] = useState(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const navigate = useNavigate();
   
   useEffect(() => {
     const loadJobs = async () => {
-      const jobsData = await fetchJobs();
-      setJobs(jobsData);
+      try {
+        console.log("Starting to fetch jobs...");
+        const jobsData = await fetchJobs();
+        console.log("Fetched jobs data:", jobsData);
+        setJobs(jobsData);
+      } catch (error) {
+        console.error("Error loading jobs:", error);
+        setJobs([]);
+      }
     };
 
     loadJobs();
-    // Poll for updates every 5 minutes
     const interval = setInterval(loadJobs, 5 * 60 * 1000);
-    
     return () => clearInterval(interval);
   }, []);
+
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      setIsAuthenticated(!!user);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    if (selectedJob) {
+      console.log("Selected job details:", selectedJob);
+      console.log("Company ID:", selectedJob.company_id);
+    }
+  }, [selectedJob]);
 
   const handleFilterChange = (filterType, value) => {
     setFilters(prev => ({
@@ -142,6 +164,20 @@ function JobBoard() {
     return matchesSearch && matchesIndustry && matchesLocation && matchesExperience && matchesSalary;
   });
 
+  const renderCompanyInfo = (job) => {
+    if (!isAuthenticated) {
+      return (
+        <h4 
+          onClick={() => navigate('/login')} 
+          style={{ cursor: 'pointer', color: '#0066cc' }}
+        >
+          [Sign in to view company]
+        </h4>
+      );
+    }
+    return <h4>{job.company}</h4>;
+  };
+
   return (
     <>
       <div className="job-board">
@@ -223,7 +259,7 @@ function JobBoard() {
                 </div>
                 <div className="job-card-content">
                   <h3>{job.title}</h3>
-                  <h4>{job.company}</h4>
+                  {renderCompanyInfo(job)}
                   <p>{job.description}</p>
                   <div className="job-card-footer">
                     <span>{job.salary_range}</span>
@@ -239,12 +275,33 @@ function JobBoard() {
               <>
                 <div className="job-header">
                   <div className="job-header-content">
-                    <h2>{selectedJob.title}</h2>
-                    <h3>{selectedJob.company_name}</h3>
-                    <div className="job-header-info">
-                      <span>{selectedJob.salary_range}</span>
-                      <span>{selectedJob.location}</span>
-                    </div>
+                    <h2>{selectedJob.title || 'Untitled Position'}</h2>
+                    {isAuthenticated ? (
+                      <>
+                        <h3>{selectedJob.company_name || 'Company name not available'}</h3>
+                        <div className="job-header-info">
+                          <span>{selectedJob.salary_range || 'Salary not specified'}</span>
+                          <span>{selectedJob.location || 'Location not specified'}</span>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <h3 
+                          onClick={() => navigate('/login')} 
+                          style={{ cursor: 'pointer', color: '#0066cc' }}
+                        >
+                          [Sign in to view company]
+                        </h3>
+                        <div className="job-header-info">
+                          <span 
+                            onClick={() => navigate('/login')} 
+                            style={{ cursor: 'pointer', color: '#0066cc' }}
+                          >
+                            [Sign in to view]
+                          </span>
+                        </div>
+                      </>
+                    )}
                   </div>
                   <button 
                     className="apply-button"
@@ -258,50 +315,64 @@ function JobBoard() {
                   <div className="meta-grid">
                     <div className="meta-item">
                       <span className="label">Posted</span>
-                      <span>{new Date(selectedJob.posting_date).toLocaleDateString()}</span>
+                      <span>
+                        {selectedJob.posting_date 
+                          ? new Date(selectedJob.posting_date).toLocaleDateString()
+                          : 'Date not available'}
+                      </span>
                     </div>
                     <div className="meta-item">
                       <span className="label">Experience Level</span>
-                      <span>{selectedJob.experience_level}</span>
+                      <span>{selectedJob.experience_level || 'Not specified'}</span>
                     </div>
                     <div className="meta-item">
                       <span className="label">Location</span>
-                      <span>{selectedJob.location}</span>
+                      <span>{selectedJob.location || 'Not specified'}</span>
                     </div>
                     <div className="meta-item">
                       <span className="label">Industry</span>
-                      <span>{selectedJob.industry}</span>
+                      <span>{selectedJob.industry || 'Not specified'}</span>
                     </div>
                     <div className="meta-item">
                       <span className="label">Headquarters</span>
-                      <span>{selectedJob.headquarters}</span>
+                      <span>{selectedJob.headquarters || 'Not specified'}</span>
                     </div>
-                    <div className="meta-item">
-                      <span className="label">Website</span>
-                      <a href={selectedJob.website} target="_blank" rel="noopener noreferrer">
-                        {selectedJob.website}
-                      </a>
-                    </div>
+                    {isAuthenticated && (
+                      <div className="meta-item">
+                        <span className="label">Website</span>
+                        {selectedJob.website ? (
+                          <a href={selectedJob.website} target="_blank" rel="noopener noreferrer">
+                            {selectedJob.website}
+                          </a>
+                        ) : (
+                          <span>Website not available</span>
+                        )}
+                      </div>
+                    )}
                   </div>
 
                   <div className="required-skills">
                     <h3>Required Skills</h3>
                     <div className="skills-list">
-                      {selectedJob.skills_required.map((skill, index) => (
-                        <span key={index} className="skill-tag">{skill}</span>
-                      ))}
+                      {Array.isArray(selectedJob.skills_required) && selectedJob.skills_required.length > 0 ? (
+                        selectedJob.skills_required.map((skill, index) => (
+                          <span key={index} className="skill-tag">{skill}</span>
+                        ))
+                      ) : (
+                        <span>No specific skills listed</span>
+                      )}
                     </div>
                   </div>
 
                   <div className="job-description">
                     <section>
                       <h3>Job Description</h3>
-                      <p>{selectedJob.job_description}</p>
+                      <p>{selectedJob.job_description || 'No description available'}</p>
                     </section>
                     
                     <section>
                       <h3>About the Company</h3>
-                      <p>{selectedJob.company_description}</p>
+                      <p>{selectedJob.company_description || 'No company description available'}</p>
                     </section>
                   </div>
                 </div>

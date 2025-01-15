@@ -17,7 +17,6 @@ function UserPortal() {
     setError('');
 
     try {
-      // 1. First verify email/password with Firebase Auth
       const userCredential = await signInWithEmailAndPassword(
         auth,
         credentials.email,
@@ -25,7 +24,6 @@ function UserPortal() {
       );
       const { user } = userCredential;
 
-      // 2. Query Firestore to get user's role using their email
       const usersRef = collection(db, "User-Details");
       const q = query(usersRef, where("email", "==", credentials.email));
       const querySnapshot = await getDocs(q);
@@ -35,22 +33,29 @@ function UserPortal() {
         return;
       }
 
-      // Get the user data from the first matching document
       const userData = querySnapshot.docs[0].data();
       const userRole = userData.role;
 
-      // 3. Set localStorage items
       localStorage.setItem('userLoggedIn', 'true');
       localStorage.setItem('userId', user.uid);
       localStorage.setItem('userEmail', user.email);
       localStorage.setItem('userRole', userRole);
 
-      //4. Navigate based on role
-      if (userRole === 'employer') {
-        localStorage.setItem('employerId', user.uid);
-        navigate('/employer/dashboard');
-      } else {
-        navigate('/dashboard');
+      // Updated routing logic to include admin
+      switch (userRole) {
+        case 'admin':
+          navigate('/admin/dashboard');
+          break;
+        case 'employer':
+          localStorage.setItem('employerId', user.uid);
+          navigate('/employer/dashboard');
+          break;
+        case 'employee':
+          navigate('/dashboard');
+          break;
+        default:
+          setError('Invalid user role');
+          break;
       }
 
     } catch (error) {

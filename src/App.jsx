@@ -9,6 +9,7 @@ import Welcome from './components/Welcome';
 import ProfileSetup from './components/ProfileSetup';
 import EmployerDashboard from './components/EmployerDashboard';
 import Contact from './components/Contact';
+import AdminDashboard from './components/AdminDashboard';
 
 const ProtectedEmployeeRoute = ({ children }) => {
   const userRole = localStorage.getItem('userRole');
@@ -36,6 +37,47 @@ const ProtectedEmployerRoute = ({ children }) => {
   }
   
   return children;
+};
+
+const ProtectedAdminRoute = ({ children }) => {
+  const userRole = localStorage.getItem('userRole');
+  
+  if (!localStorage.getItem('userLoggedIn')) {
+    return <Navigate to="/login" />;
+  }
+  
+  if (userRole !== 'admin') {
+    return <Navigate to="/" />;
+  }
+  
+  return children;
+};
+
+const LoginRedirect = () => {
+  const navigate = useNavigate();
+  
+  useEffect(() => {
+    const isLoggedIn = localStorage.getItem('userLoggedIn');
+    const userRole = localStorage.getItem('userRole');
+    
+    if (isLoggedIn) {
+      switch (userRole) {
+        case 'employer':
+          navigate('/employer/dashboard');
+          break;
+        case 'admin':
+          navigate('/admin/dashboard');
+          break;
+        case 'employee':
+          navigate('/dashboard');
+          break;
+        default:
+          navigate('/login');
+      }
+    }
+  }, [navigate]);
+
+  return <UserPortal />;
 };
 
 function App() {
@@ -185,7 +227,21 @@ function App() {
 
   const DashboardLink = () => {
     const userRole = localStorage.getItem('userRole');
-    const dashboardPath = userRole === 'employer' ? '/employer/dashboard' : '/dashboard';
+    let dashboardPath;
+    
+    switch (userRole) {
+      case 'employer':
+        dashboardPath = '/employer/dashboard';
+        break;
+      case 'admin':
+        dashboardPath = '/admin/dashboard';
+        break;
+      case 'employee':
+        dashboardPath = '/dashboard';
+        break;
+      default:
+        dashboardPath = '/login';
+    }
     
     return <Link to={dashboardPath}>Dashboard</Link>;
   };
@@ -354,7 +410,7 @@ function App() {
             </>
           } />
           <Route path="/jobs" element={<JobBoard />} />
-          <Route path="/login" element={<UserPortal />} />
+          <Route path="/login" element={<LoginRedirect />} />
           <Route path="/contact" element={<Contact />} />
           <Route 
             path="/dashboard" 
@@ -373,6 +429,14 @@ function App() {
               <ProtectedEmployerRoute>
                 <EmployerDashboard />
               </ProtectedEmployerRoute>
+            } 
+          />
+          <Route 
+            path="/admin/dashboard" 
+            element={
+              <ProtectedAdminRoute>
+                <AdminDashboard />
+              </ProtectedAdminRoute>
             } 
           />
         </Routes>
