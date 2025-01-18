@@ -125,38 +125,66 @@ function AdminDashboard() {
 
   const handleApproveJob = async (job) => {
     try {
-      // Check if job exists in approved collection
+      // First add to approved collection
       const approvedJobsRef = collection(db, "agorajobs-posting-official-approved");
-      const q = query(approvedJobsRef, where("job_id", "==", job.job_id));
-      const querySnapshot = await getDocs(q);
+      await addDoc(approvedJobsRef, {
+        ...job,
+        approved_date: new Date().toISOString(),
+        approved_by: auth.currentUser.email,
+        last_modified: new Date().toISOString()
+      });
 
-      if (!querySnapshot.empty) {
-        // Update existing approved job
-        const approvedJobDoc = querySnapshot.docs[0];
-        await updateDoc(doc(approvedJobsRef, approvedJobDoc.id), {
-          ...job,
-          last_modified: new Date().toISOString(),
-          approved_date: new Date().toISOString(),
-          approved_by: auth.currentUser.email
-        });
+      // Delete from pending collection using the correct document ID
+      const pendingJobsRef = collection(db, "agorajobs-postingdetails");
+      const pendingQuery = query(pendingJobsRef, where("job_id", "==", job.job_id));
+      const pendingSnapshot = await getDocs(pendingQuery);
+
+      if (!pendingSnapshot.empty) {
+        // Delete the pending job document
+        await deleteDoc(doc(pendingJobsRef, pendingSnapshot.docs[0].id));
       } else {
-        // Add new approved job
-        await addDoc(approvedJobsRef, {
-          ...job,
-          approved_date: new Date().toISOString(),
-          approved_by: auth.currentUser.email
-        });
+        console.error("Could not find pending job to delete");
       }
 
-      // Update local state by moving job from unapproved to approved
+      // Update local state
       const updatedJob = { ...job, isApproved: true };
-      setUnapprovedJobs(unapprovedJobs.filter(j => j.id !== job.id));
+      setUnapprovedJobs(unapprovedJobs.filter(j => j.job_id !== job.job_id));
       setApprovedJobs([...approvedJobs, updatedJob]);
 
       alert("Job approved successfully!");
     } catch (error) {
       console.error("Error approving job:", error);
       alert("Error approving job");
+    }
+  };
+
+  const handleUnapproveJob = async (job) => {
+    try {
+      // First, add the job back to the pending collection (without approval fields)
+      const { approved_by, approved_date, ...jobWithoutApproval } = job;
+      const pendingJobsRef = collection(db, "agorajobs-postingdetails");
+      await addDoc(pendingJobsRef, {
+        ...jobWithoutApproval,
+        last_modified: new Date().toISOString()
+      });
+
+      // Then delete from approved collection
+      const approvedJobsRef = collection(db, "agorajobs-posting-official-approved");
+      const q = query(approvedJobsRef, where("job_id", "==", job.job_id));
+      const querySnapshot = await getDocs(q);
+
+      if (!querySnapshot.empty) {
+        await deleteDoc(doc(approvedJobsRef, querySnapshot.docs[0].id));
+      }
+
+      // Update local state
+      setApprovedJobs(approvedJobs.filter(j => j.id !== job.id));
+      setUnapprovedJobs([...unapprovedJobs, jobWithoutApproval]);
+
+      alert("Job unapproved successfully!");
+    } catch (error) {
+      console.error("Error unapproving job:", error);
+      alert("Error unapproving job");
     }
   };
 
@@ -284,9 +312,17 @@ function AdminDashboard() {
                         <td>{job.company_id}</td>
                         <td>{job.approved_date ? new Date(job.approved_date).toLocaleDateString() : 'N/A'}</td>
                         <td>
-                          <button onClick={() => setSelectedJob(job)} className="view-button">
-                            View
-                          </button>
+                          <div className="action-buttons">
+                            <button onClick={() => setSelectedJob(job)} className="view-button">
+                              View
+                            </button>
+                            <button 
+                              onClick={() => handleUnapproveJob(job)} 
+                              className="unapprove-button"
+                            >
+                              Unapprove
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))}

@@ -21,7 +21,8 @@ function EmployerDashboard() {
     salary_range: '',
     location: '',
     skills_required: '',
-    experience_level: ''
+    experience_level: '',
+    job_deadline: ''
   });
   const [activeJobs, setActiveJobs] = useState([]);
   const [selectedJob, setSelectedJob] = useState(null);
@@ -36,6 +37,8 @@ function EmployerDashboard() {
   });
   const [jobApplicants, setJobApplicants] = useState([]);
   const [customLocation, setCustomLocation] = useState(false);
+  const [approvedJobs, setApprovedJobs] = useState([]);
+  const [pendingJobs, setPendingJobs] = useState([]);
 
   // Predefined location options
   const locationOptions = [
@@ -97,17 +100,39 @@ function EmployerDashboard() {
         const companyData = userDoc.data();
         const company_id = companyData.company_id;
 
-        // Query jobs collection for jobs with matching company_id
-        const jobsCollection = collection(db, 'agorajobs-postingdetails');
-        const jobsQuery = query(jobsCollection, where('company_id', '==', company_id));
-        const querySnapshot = await getDocs(jobsQuery);
+        // First fetch approved jobs
+        const approvedJobsRef = collection(db, 'agorajobs-posting-official-approved');
+        const approvedJobsQuery = query(approvedJobsRef, where('company_id', '==', company_id));
+        const approvedSnapshot = await getDocs(approvedJobsQuery);
         
-        const jobs = querySnapshot.docs.map(doc => ({
+        const approvedJobsData = approvedSnapshot.docs.map(doc => ({
           id: doc.id,
-          ...doc.data()
+          ...doc.data(),
+          status: 'approved'
         }));
 
-        setActiveJobs(jobs);
+        // Get the job_ids of approved jobs
+        const approvedJobIds = approvedJobsData.map(job => job.job_id);
+        console.log("Approved job IDs:", approvedJobIds); // Debug log
+
+        // Fetch all pending jobs
+        const pendingJobsRef = collection(db, 'agorajobs-postingdetails');
+        const pendingJobsQuery = query(pendingJobsRef, where('company_id', '==', company_id));
+        const pendingSnapshot = await getDocs(pendingJobsQuery);
+        
+        // Filter out jobs that are already approved
+        const pendingJobsData = pendingSnapshot.docs
+          .map(doc => ({
+            id: doc.id,
+            ...doc.data(),
+            status: 'pending'
+          }))
+          .filter(job => !approvedJobIds.includes(job.job_id));
+
+        console.log("Filtered pending jobs:", pendingJobsData); // Debug log
+        
+        setApprovedJobs(approvedJobsData);
+        setPendingJobs(pendingJobsData);
       } catch (error) {
         console.error("Error fetching jobs:", error);
       }
@@ -164,6 +189,11 @@ function EmployerDashboard() {
       // Generate a unique job_id
       const job_id = `JOB_${company_id.slice(4)}_${Date.now()}`;
 
+      // Calculate deadJobDate (6 months after job_deadline)
+      const jobDeadline = new Date(jobForm.job_deadline);
+      const deadJobDate = new Date(jobDeadline);
+      deadJobDate.setMonth(deadJobDate.getMonth() + 6);
+
       // Create the job posting document
       const jobData = {
         job_id: job_id,
@@ -173,6 +203,8 @@ function EmployerDashboard() {
         job_description: jobForm.job_description,
         location: jobForm.location,
         posting_date: new Date().toISOString(),
+        job_deadline: jobForm.job_deadline,
+        deadJobDate: deadJobDate.toISOString(), // Add the deadJobDate field
         salary_range: jobForm.salary_range,
         skills_required: jobForm.skills_required
       };
@@ -191,7 +223,8 @@ function EmployerDashboard() {
         salary_range: '',
         location: '',
         skills_required: '',
-        experience_level: ''
+        experience_level: '',
+        job_deadline: ''
       });
     } catch (error) {
       console.error("Error posting job:", error.message);
@@ -300,10 +333,10 @@ function EmployerDashboard() {
       </div>
 
       <div className="dashboard-content">
-        <h2>Active Job Postings</h2>
+        <h2>Active Jobs</h2>
         <div className="jobs-container">
           <div className="jobs-list">
-            {activeJobs.map(job => (
+            {approvedJobs.map(job => (
               <div 
                 key={job.id}
                 className={`job-card ${selectedJob?.id === job.id ? 'selected' : ''}`}
@@ -314,188 +347,210 @@ function EmployerDashboard() {
                   <span>{job.location}</span>
                   <span>{job.salary_range}</span>
                   <span>{new Date(job.posting_date).toLocaleDateString()}</span>
+                  <span className="status approved">Approved</span>
                 </div>
               </div>
             ))}
           </div>
+        </div>
 
-          {selectedJob && (
-            <div className="job-details-panel">
-              <div className="job-header">
-                <h2>{selectedJob.title}</h2>
-                <div className="job-actions">
-                  <button onClick={() => handleEditClick(selectedJob)} className="edit-button">
-                    Edit
-                  </button>
-                  <button onClick={() => setSelectedJob(null)} className="close-button">
-                    ×
-                  </button>
+        <h2>Pending Job Approval</h2>
+        <div className="jobs-container">
+          <div className="jobs-list">
+            {pendingJobs.map(job => (
+              <div 
+                key={job.id}
+                className={`job-card ${selectedJob?.id === job.id ? 'selected' : ''}`}
+                onClick={() => handleJobSelect(job)}
+              >
+                <h3>{job.title}</h3>
+                <div className="job-card-details">
+                  <span>{job.location}</span>
+                  <span>{job.salary_range}</span>
+                  <span>{new Date(job.posting_date).toLocaleDateString()}</span>
+                  <span className="status pending">Pending Approval</span>
                 </div>
               </div>
+            ))}
+          </div>
+        </div>
 
-              {editingJob?.id === selectedJob.id ? (
-                <form onSubmit={handleEditSubmit} className="edit-form">
-                  <div className="form-group">
-                    <label>Job Title</label>
-                    <input
-                      type="text"
-                      value={editForm.title}
-                      onChange={(e) => setEditForm(prev => ({
-                        ...prev,
-                        title: e.target.value
-                      }))}
-                      required
-                    />
-                  </div>
+        {selectedJob && (
+          <div className="job-details-panel">
+            <div className="job-header">
+              <h2>{selectedJob.title}</h2>
+              <div className="job-actions">
+                <button onClick={() => handleEditClick(selectedJob)} className="edit-button">
+                  Edit
+                </button>
+                <button onClick={() => setSelectedJob(null)} className="close-button">
+                  ×
+                </button>
+              </div>
+            </div>
 
-                  <div className="form-group">
+            {editingJob?.id === selectedJob.id ? (
+              <form onSubmit={handleEditSubmit} className="edit-form">
+                <div className="form-group">
+                  <label>Job Title</label>
+                  <input
+                    type="text"
+                    value={editForm.title}
+                    onChange={(e) => setEditForm(prev => ({
+                      ...prev,
+                      title: e.target.value
+                    }))}
+                    required
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>Experience Level</label>
+                  <select
+                    value={editForm.experience_level}
+                    onChange={(e) => setEditForm(prev => ({
+                      ...prev,
+                      experience_level: e.target.value
+                    }))}
+                    required
+                  >
+                    <option value="">Select Level</option>
+                    <option value="Entry-level">Entry-level</option>
+                    <option value="Mid-level">Mid-level</option>
+                    <option value="Senior">Senior</option>
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label>Location</label>
+                  <input
+                    type="text"
+                    value={editForm.location}
+                    onChange={(e) => setEditForm(prev => ({
+                      ...prev,
+                      location: e.target.value
+                    }))}
+                    required
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>Salary Range</label>
+                  <input
+                    type="text"
+                    value={editForm.salary_range}
+                    onChange={(e) => setEditForm(prev => ({
+                      ...prev,
+                      salary_range: e.target.value
+                    }))}
+                    required
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>Required Skills (comma-separated)</label>
+                  <input
+                    type="text"
+                    value={editForm.skills_required}
+                    onChange={(e) => setEditForm(prev => ({
+                      ...prev,
+                      skills_required: e.target.value
+                    }))}
+                    required
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>Job Description</label>
+                  <textarea
+                    value={editForm.job_description}
+                    onChange={(e) => setEditForm(prev => ({
+                      ...prev,
+                      job_description: e.target.value
+                    }))}
+                    required
+                    rows="5"
+                  />
+                </div>
+
+                <div className="form-buttons">
+                  <button
+                    type="button"
+                    className="secondary-button"
+                    onClick={() => setEditingJob(null)}
+                  >
+                    Cancel
+                  </button>
+                  <button type="submit" className="primary-button">
+                    Save Changes
+                  </button>
+                </div>
+              </form>
+            ) : (
+              <div className="job-content">
+                <div className="job-info">
+                  <div className="detail-item">
                     <label>Experience Level</label>
-                    <select
-                      value={editForm.experience_level}
-                      onChange={(e) => setEditForm(prev => ({
-                        ...prev,
-                        experience_level: e.target.value
-                      }))}
-                      required
-                    >
-                      <option value="">Select Level</option>
-                      <option value="Entry-level">Entry-level</option>
-                      <option value="Mid-level">Mid-level</option>
-                      <option value="Senior">Senior</option>
-                    </select>
+                    <p>{selectedJob.experience_level}</p>
                   </div>
-
-                  <div className="form-group">
+                  <div className="detail-item">
                     <label>Location</label>
-                    <input
-                      type="text"
-                      value={editForm.location}
-                      onChange={(e) => setEditForm(prev => ({
-                        ...prev,
-                        location: e.target.value
-                      }))}
-                      required
-                    />
+                    <p>{selectedJob.location}</p>
                   </div>
-
-                  <div className="form-group">
+                  <div className="detail-item">
                     <label>Salary Range</label>
-                    <input
-                      type="text"
-                      value={editForm.salary_range}
-                      onChange={(e) => setEditForm(prev => ({
-                        ...prev,
-                        salary_range: e.target.value
-                      }))}
-                      required
-                    />
+                    <p>{selectedJob.salary_range}</p>
                   </div>
-
-                  <div className="form-group">
-                    <label>Required Skills (comma-separated)</label>
-                    <input
-                      type="text"
-                      value={editForm.skills_required}
-                      onChange={(e) => setEditForm(prev => ({
-                        ...prev,
-                        skills_required: e.target.value
-                      }))}
-                      required
-                    />
+                  <div className="detail-item">
+                    <label>Posted On</label>
+                    <p>{new Date(selectedJob.posting_date).toLocaleDateString()}</p>
                   </div>
-
-                  <div className="form-group">
+                  <div className="detail-item">
+                    <label>Required Skills</label>
+                    <div className="skills-list">
+                      {selectedJob.skills_required.split(',').map((skill, index) => (
+                        <span key={index} className="skill-tag">{skill.trim()}</span>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="detail-item">
                     <label>Job Description</label>
-                    <textarea
-                      value={editForm.job_description}
-                      onChange={(e) => setEditForm(prev => ({
-                        ...prev,
-                        job_description: e.target.value
-                      }))}
-                      required
-                      rows="5"
-                    />
+                    <p>{selectedJob.job_description}</p>
                   </div>
 
-                  <div className="form-buttons">
-                    <button
-                      type="button"
-                      className="secondary-button"
-                      onClick={() => setEditingJob(null)}
-                    >
-                      Cancel
-                    </button>
-                    <button type="submit" className="primary-button">
-                      Save Changes
-                    </button>
-                  </div>
-                </form>
-              ) : (
-                <div className="job-content">
-                  <div className="job-info">
-                    <div className="detail-item">
-                      <label>Experience Level</label>
-                      <p>{selectedJob.experience_level}</p>
-                    </div>
-                    <div className="detail-item">
-                      <label>Location</label>
-                      <p>{selectedJob.location}</p>
-                    </div>
-                    <div className="detail-item">
-                      <label>Salary Range</label>
-                      <p>{selectedJob.salary_range}</p>
-                    </div>
-                    <div className="detail-item">
-                      <label>Posted On</label>
-                      <p>{new Date(selectedJob.posting_date).toLocaleDateString()}</p>
-                    </div>
-                    <div className="detail-item">
-                      <label>Required Skills</label>
-                      <div className="skills-list">
-                        {selectedJob.skills_required.split(',').map((skill, index) => (
-                          <span key={index} className="skill-tag">{skill.trim()}</span>
-                        ))}
-                      </div>
-                    </div>
-                    <div className="detail-item">
-                      <label>Job Description</label>
-                      <p>{selectedJob.job_description}</p>
-                    </div>
-
-                    <div className="detail-item applicants-section">
-                      <label>Applications ({jobApplicants.length})</label>
-                      <div className="applicants-list">
-                        {jobApplicants.length === 0 ? (
-                          <p className="no-applicants">No applications yet</p>
-                        ) : (
-                          jobApplicants.map((applicant) => (
-                            <div key={applicant.id} className="applicant-card">
-                              <div className="applicant-header">
-                                <h4>{applicant.applicant_name}</h4>
-                                <span className="application-date">
-                                  Applied: {new Date(applicant.application_date).toLocaleDateString()}
-                                </span>
-                              </div>
-                              <div className="applicant-details">
-                                <p><strong>University:</strong> {applicant.university}</p>
-                                <p><strong>Expected Graduation:</strong> {applicant.graduation}</p>
-                              </div>
-                              <div className="applicant-resume">
-                                <span className="resume-id">
-                                  Resume ID: {applicant.resume_id}
-                                </span>
-                              </div>
+                  <div className="detail-item applicants-section">
+                    <label>Applications ({jobApplicants.length})</label>
+                    <div className="applicants-list">
+                      {jobApplicants.length === 0 ? (
+                        <p className="no-applicants">No applications yet</p>
+                      ) : (
+                        jobApplicants.map((applicant) => (
+                          <div key={applicant.id} className="applicant-card">
+                            <div className="applicant-header">
+                              <h4>{applicant.applicant_name}</h4>
+                              <span className="application-date">
+                                Applied: {new Date(applicant.application_date).toLocaleDateString()}
+                              </span>
                             </div>
-                          ))
-                        )}
-                      </div>
+                            <div className="applicant-details">
+                              <p><strong>University:</strong> {applicant.university}</p>
+                              <p><strong>Expected Graduation:</strong> {applicant.graduation}</p>
+                            </div>
+                            <div className="applicant-resume">
+                              <span className="resume-id">
+                                Resume ID: {applicant.resume_id}
+                              </span>
+                            </div>
+                          </div>
+                        ))
+                      )}
                     </div>
                   </div>
                 </div>
-              )}
-            </div>
-          )}
-        </div>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {showProfileForm && (
@@ -780,6 +835,22 @@ function EmployerDashboard() {
                     }))
                   }
                   placeholder="e.g. React, Node.js, SQL"
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Application Deadline</label>
+                <input
+                  type="date"
+                  value={jobForm.job_deadline}
+                  onChange={(e) =>
+                    setJobForm((prev) => ({
+                      ...prev,
+                      job_deadline: e.target.value,
+                    }))
+                  }
+                  min={new Date().toISOString().split('T')[0]}
                   required
                 />
               </div>

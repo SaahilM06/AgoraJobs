@@ -2485,3 +2485,34 @@ th, td {
 th {
   background-color: #f8f9fa;
 }
+
+.status {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.8em;
+  font-weight: 500;
+}
+
+.status.approved {
+  background-color: #e6f4ea;
+  color: #1e7e34;
+}
+
+.status.pending {
+  background-color: #fff3e0;
+  color: #f57c00;
+}
+
+.unapprove-button {
+  background-color: #ff9800;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-left: 5px;
+}
+
+.unapprove-button:hover {
+  background-color: #f57c00;
+}

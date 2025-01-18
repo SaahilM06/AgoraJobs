@@ -61,11 +61,18 @@ export async function fetchJobs() {
 
 export async function appendJob(newJob) {
   try {
+    // Calculate deadJobDate (6 months after job_deadline)
+    const jobDeadline = new Date(newJob.job_deadline);
+    const deadJobDate = new Date(jobDeadline);
+    deadJobDate.setMonth(deadJobDate.getMonth() + 6);
+
     const jobsCollection = collection(db, 'agorajobs-postingdetails');
     const docRef = await addDoc(jobsCollection, {
       company_id: newJob.company_id,
       company_name: newJob.company_name,
       posting_date: new Date().toISOString(),
+      job_deadline: newJob.job_deadline,
+      deadJobDate: deadJobDate.toISOString(),
       closing_date: newJob.closing_date,
       job_description: newJob.job_description,
       job_type: newJob.job_type,

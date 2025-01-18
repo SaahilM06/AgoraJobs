@@ -144,7 +144,18 @@ function JobBoard() {
   const uniqueExperienceLevels = getUniqueValues(jobs, 'experience_level');
   const uniqueSalaryRanges = getUniqueValues(jobs, 'salary_range');
 
+  const isJobActive = (job) => {
+    if (!job.job_deadline) return true; // If no deadline, show the job
+    const deadline = new Date(job.job_deadline);
+    const now = new Date();
+    return deadline > now;
+  };
+
   const filteredJobs = jobs.filter(job => {
+    // First check if the job is still active (deadline hasn't passed)
+    const isActive = isJobActive(job);
+    if (!isActive) return false;
+
     const searchTerms = searchQuery.toLowerCase();
     const matchesSearch = searchQuery === '' || 
       (job.title?.toLowerCase() || '').includes(searchTerms) ||
@@ -349,6 +360,14 @@ function JobBoard() {
                         )}
                       </div>
                     )}
+                    <div className="meta-item">
+                      <span className="label">Application Deadline</span>
+                      <span>
+                        {selectedJob.job_deadline 
+                          ? new Date(selectedJob.job_deadline).toLocaleDateString()
+                          : 'No deadline specified'}
+                      </span>
+                    </div>
                   </div>
 
                   <div className="required-skills">
