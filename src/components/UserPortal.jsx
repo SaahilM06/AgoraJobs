@@ -50,6 +50,10 @@ function UserPortal() {
           localStorage.setItem('employerId', user.uid);
           navigate('/employer/dashboard');
           break;
+        case 'school_organization':
+          localStorage.setItem('organizationId', user.uid);
+          navigate('/organization/dashboard');
+          break;
         case 'employee':
           navigate('/dashboard');
           break;

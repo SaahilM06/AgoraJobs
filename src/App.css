@@ -2516,3 +2516,33 @@ th {
 .unapprove-button:hover {
   background-color: #f57c00;
 }
+
+.organizations-section {
+  margin-top: 40px;
+}
+
+.organizations-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.organization-card {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.organization-card h3 {
+  margin: 0 0 10px 0;
+  color: #333;
+}
+
+.org-description {
+  margin-top: 10px;
+  color: #666;
+  font-size: 14px;
+  line-height: 1.4;
+}

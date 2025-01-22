@@ -10,6 +10,7 @@ import ProfileSetup from './components/ProfileSetup';
 import EmployerDashboard from './components/EmployerDashboard';
 import Contact from './components/Contact';
 import AdminDashboard from './components/AdminDashboard';
+import SchoolOrganizationDashboard from './components/SchoolOrganizationDashboard';
 
 const ProtectedEmployeeRoute = ({ children }) => {
   const userRole = localStorage.getItem('userRole');
@@ -439,6 +440,7 @@ function App() {
               </ProtectedAdminRoute>
             } 
           />
+          <Route path="/organization/dashboard" element={<SchoolOrganizationDashboard />} />
         </Routes>
 
         {/* Footer */}

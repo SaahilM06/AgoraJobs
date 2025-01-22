@@ -39,6 +39,7 @@ function EmployerDashboard() {
   const [customLocation, setCustomLocation] = useState(false);
   const [approvedJobs, setApprovedJobs] = useState([]);
   const [pendingJobs, setPendingJobs] = useState([]);
+  const [schoolOrganizations, setSchoolOrganizations] = useState([]);
 
   // Predefined location options
   const locationOptions = [
@@ -139,6 +140,27 @@ function EmployerDashboard() {
     };
 
     fetchEmployerJobs();
+  }, []);
+
+  useEffect(() => {
+    const fetchSchoolOrganizations = async () => {
+      try {
+        const organizationsRef = collection(db, "User-Details");
+        const q = query(organizationsRef, where("role", "==", "school_organization"));
+        const querySnapshot = await getDocs(q);
+        
+        const orgsData = querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        
+        setSchoolOrganizations(orgsData);
+      } catch (error) {
+        console.error("Error fetching school organizations:", error);
+      }
+    };
+
+    fetchSchoolOrganizations();
   }, []);
 
   const handleLogout = () => {
@@ -370,6 +392,19 @@ function EmployerDashboard() {
                   <span>{new Date(job.posting_date).toLocaleDateString()}</span>
                   <span className="status pending">Pending Approval</span>
                 </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="organizations-section">
+          <h2>School Organizations</h2>
+          <div className="organizations-grid">
+            {schoolOrganizations.map(org => (
+              <div key={org.id} className="organization-card">
+                <h3>{org.organization_name || 'Unnamed Organization'}</h3>
+                <p><strong>University:</strong> {org.university}</p>
+                <p className="org-description">{org.organization_description}</p>
               </div>
             ))}
           </div>

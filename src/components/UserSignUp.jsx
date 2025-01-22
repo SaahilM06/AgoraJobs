@@ -29,11 +29,9 @@ const UserSignUp = () => {
     }
 
     try {
-      // 1. Create authentication user
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
-      // 2. Create user document in Firestore with role-specific structure
       let userData;
       
       if (role === "employer") {
@@ -46,6 +44,15 @@ const UserSignUp = () => {
           description: "",
           headquarters: "",
           website: "",
+          createdAt: new Date().toISOString()
+        };
+      } else if (role === "school_organization") {
+        userData = {
+          email: email,
+          role: role,
+          organization_id: generateRandomId('ORG'),
+          university: "",
+          organization_description: "",
           createdAt: new Date().toISOString()
         };
       } else {
@@ -64,15 +71,16 @@ const UserSignUp = () => {
 
       setSuccess(`User signed up: ${email} as ${role}`);
 
-      // 3. Set localStorage items
       localStorage.setItem("userLoggedIn", "true");
       localStorage.setItem("userId", user.uid);
       localStorage.setItem("userRole", role);
       
-      // 4. Set employerId only if role is employer
       if (role === "employer") {
         localStorage.setItem("employerId", user.uid);
         navigate("/employer/dashboard");
+      } else if (role === "school_organization") {
+        localStorage.setItem("organizationId", user.uid);
+        navigate("/organization/dashboard");
       } else {
         navigate("/dashboard");
       }
@@ -130,6 +138,7 @@ const UserSignUp = () => {
             >
               <option value="employee">Employee</option>
               <option value="employer">Employer</option>
+              <option value="school_organization">School Organization</option>
             </select>
           </div>
           <button
